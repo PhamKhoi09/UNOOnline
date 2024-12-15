@@ -163,6 +163,12 @@ namespace UnoOnline
                 }
             }
             //Hiển thị
+            Form1.ActiveForm.Invoke(new Action(() =>
+            {
+                Form1 form1 = (Form1)Application.OpenForms[0];
+                form1.UpdateCurrentCardDisplay(CurrentCard);
+                form1.DisplayPlayerHand(Instance.Players[0].Hand);
+            }));
         }
 
         public static void HandleTurnMessage(Message message)

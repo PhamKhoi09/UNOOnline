@@ -52,7 +52,7 @@ namespace UnoOnline
 
                             // Gán tên người dùng
                             CurrentUsername = username;
-
+                            Program.player.Name = username;
                             // Chuyển sang form Menu.cs
                             Menu menuForm = new Menu();
                             this.Hide(); // Ẩn form Login
