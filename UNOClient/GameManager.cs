@@ -130,7 +130,7 @@ namespace UnoOnline
 
         public bool IsValidMove(Card card)
         {
-            return card.Color == CurrentCard.Color || card.Value == CurrentCard.Value || card.Color == "Wild";
+            return card.Color == CurrentCard.Color || card.Value == CurrentCard.Value || card.Color == "Wild" || (CurrentCard.CardName.Contains("Wild") && card.CardName.Contains("Wild"));
         }
 
         public void HandleUpdate(Message message)

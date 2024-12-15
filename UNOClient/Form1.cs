@@ -37,8 +37,8 @@ namespace UnoOnline {
             if (currentCard.CardName.Contains("Wild"))
             {
                 if (currentCard.Value == "Draw")
-                    cardImagePath = Path.Combine("Resources", "CardImages", "Wild.png");
-                cardImagePath = Path.Combine("Resources", "CardImages", "Wild_Draw.png");
+                    cardImagePath = Path.Combine("Resources", "CardImages", "Wild_Draw.png");
+                cardImagePath = Path.Combine("Resources", "CardImages", "Wild.png");
             }
             else
             // Construct the file path for the card image
