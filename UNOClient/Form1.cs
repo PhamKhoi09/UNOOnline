@@ -127,9 +127,12 @@ namespace UnoOnline {
             chatHistory.ScrollToCaret();
         }
 
-        
+        private bool GetAutoScroll()
+        {
+            return AutoScroll;
+        }
 
-        private void InitializeGameLayout()
+        private void InitializeGameLayout(bool autoScroll)
         {
             this.ClientSize = new Size(1280, 720);
             this.StartPosition = FormStartPosition.CenterScreen;
@@ -324,7 +327,11 @@ namespace UnoOnline {
                 Height = 150,
                 FlowDirection = FlowDirection.LeftToRight,
                 WrapContents = false,
-                AutoScroll = true
+                AutoScroll = true,
+                Location = new Point(0, 750), // Vị trí nằm phía dưới cửa sổ (1600x900)
+                Size = new Size(1600, 150), // Kích thước Panel
+                BorderStyle = BorderStyle.FixedSingle, // Đặt viền cho Panel để dễ quan sát
+                BackColor = Color.LightGray // Màu nền tùy chọn
             };
 
             // Panel chứa các nút action
@@ -484,6 +491,19 @@ namespace UnoOnline {
             InitializeTimer();
             ApplyCustomTheme();
             InitializeCustomComponents();
+            this.ClientSize = new System.Drawing.Size(1600, 900); // Kích thước nội dung (không bao gồm thanh tiêu đề và viền)
+            this.StartPosition = FormStartPosition.CenterScreen; // Hiển thị Form ở giữa màn hình
+
+            this.BackgroundImageLayout = ImageLayout.None; // Đảm bảo kích thước chính xác của hình ảnh được giữ nguyên
+            if (this.BackgroundImage != null)
+            {
+                this.ClientSize = this.BackgroundImage.Size; // Đặt kích thước Form khớp với kích thước hình ảnh
+            }
+            // Tùy chọn: Ngăn thay đổi kích thước Form
+            this.FormBorderStyle = FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
+            this.MinimizeBox = true;
+            this.StartPosition = FormStartPosition.CenterScreen; // Hiển thị Form ở giữa màn hình
         }
 
         // Inside the Form1 class
@@ -516,10 +536,12 @@ namespace UnoOnline {
             // Label for current card
             currentCardPictureBox = new PictureBox
             {
-                Location = new Point(300, 50), // Adjust the location as needed
                 Size = new Size(138, 200),     // Adjust to match your card image size
                 SizeMode = PictureBoxSizeMode.StretchImage, // Ensure the image fits correctly
-                BackColor = Color.LightGray    // Optional: Background color
+                BackColor = Color.Transparent,  // Optional: Background color
+                Location = new Point((this.ClientSize.Width - 138) / 2, // Vị trí trung tâm ngang
+                                     (this.ClientSize.Height - 200) / 2), // Vị trí trung tâm dọc
+                BorderStyle = BorderStyle.FixedSingle,
             };
             Controls.Add(currentCardPictureBox);
 
@@ -695,7 +717,6 @@ namespace UnoOnline {
             this.yellUNOButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
-           
             // drawCardButton
             // 
             this.drawCardButton.Location = new System.Drawing.Point(0, 0);
@@ -743,7 +764,7 @@ namespace UnoOnline {
             this.AutoSize = true;
             this.BackgroundImage = global::UnoOnline.Properties.Resources.Table_2;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.ClientSize = new System.Drawing.Size(647, 441);
+            this.ClientSize = new System.Drawing.Size(649, 370);
             this.Controls.Add(this.yellUNOButton);
             this.Controls.Add(this.PlayerHandPanel);
             this.Controls.Add(this.turnTimer);
