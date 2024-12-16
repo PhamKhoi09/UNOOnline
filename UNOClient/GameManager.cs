@@ -76,7 +76,6 @@ namespace UnoOnline
             string currentColor = currentCard[0];
             string currentValue = currentCard[1];
             Instance.CurrentCard = new Card(currentCardName, currentColor, currentValue);
-            Form1 form1 = new Form1();
         }
 
         public static void UpdateOtherPlayerStat(Message message)
@@ -165,11 +164,15 @@ namespace UnoOnline
             //Hiển thị
             Form1.ActiveForm.Invoke(new Action(() =>
             {
-                Form1 form1 = (Form1)Application.OpenForms[0];
-                form1.UpdateCurrentCardDisplay(CurrentCard);
-                form1.DisplayPlayerHand(Instance.Players[0].Hand);
+                Form1 form1 = (Form1)Application.OpenForms.OfType<Form1>().FirstOrDefault();
+                if (form1 != null)
+                {
+                    form1.UpdateCurrentCardDisplay(CurrentCard);
+                    form1.DisplayPlayerHand(Instance.Players[0].Hand);
+                }
             }));
         }
+
 
         public static void HandleTurnMessage(Message message)
         {
@@ -187,8 +190,15 @@ namespace UnoOnline
                         ClientSocket.SendData(new Message(MessageType.SpecialCardEffect, new List<string> { Program.player.Name, (Instance.Players[0].Hand.Count + 2).ToString() }));
                     }
                 }
-                // Enable playable cards
-                //Form1.EnablePlayableCards();
+                //Enable EnableCardAndDrawButton
+                Form1.ActiveForm.Invoke(new Action(() =>
+                {
+                    Form1 form1 = (Form1)Application.OpenForms.OfType<Form1>().FirstOrDefault();
+                    if (form1 != null)
+                    {
+                        form1.EnableCardAndDrawButton();
+                    }
+                }));
             }
         }
         public static void HandleSpecialDraw(Message message)
@@ -204,6 +214,16 @@ namespace UnoOnline
                 string value = card[1];
                 player.Hand.Add(new Card(cardName, color, value));
             }
+
+            //Hiển thị bài trên tay
+            Form1.ActiveForm.Invoke(new Action(() =>
+            {
+                Form1 form1 = (Form1)Application.OpenForms.OfType<Form1>().FirstOrDefault();
+                if (form1 != null)
+                {
+                    form1.DisplayPlayerHand(player.Hand);
+                }
+            }));
         }
         public static void HandleCardDraw(Message message)
         {

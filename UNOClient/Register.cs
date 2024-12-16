@@ -42,7 +42,7 @@ namespace UnoOnline
             string passwordHash = PasswordHelper.HashPassword(password);
 
             // Chuỗi kết nối cập nhật
-            string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\PC\Source\Repos\Uno_Online\UnoClient\Database1.mdf;Integrated Security=True";
+            string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\ledan\Documents\GitHub\UNOOnline\UNOClient\Database1.mdf;Integrated Security=True";
 
             try
             {

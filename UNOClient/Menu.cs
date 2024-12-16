@@ -50,9 +50,7 @@ namespace UnoOnline
 
         private static void Connect()
         {
-            IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
-            IPAddress iPAddress = host.AddressList.FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork); //Lấy ra IP dạng IPv4 từ host ở trên
-            IPEndPoint serverEP = new IPEndPoint(iPAddress, 11000);
+            IPEndPoint serverEP = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 11000); //Tạo endpoint với IP của host và cổng
 
             ClientSocket.ConnectToServer(serverEP);
 
@@ -71,8 +69,8 @@ namespace UnoOnline
         private void Menu_FormClosing(object sender, FormClosingEventArgs e)
         {
             //Dừng chạy chương trình khi form đóng, stop debuging
-            Environment.Exit(0);
-            Application.Exit();
+            //Environment.Exit(0);
+            //Application.Exit();
         }
 
         private void BtnExit_Click(object sender, EventArgs e)

@@ -14,7 +14,7 @@ namespace UnoOnline
             InitializeComponent();
         }
 
-        private void Button_DangNhap_Click(object sender, EventArgs e)
+        public  void Button_DangNhap_Click(object sender, EventArgs e)
         {
             // Lấy thông tin từ TextBox
             string username = usernameTextBox.Text.Trim();
@@ -27,7 +27,7 @@ namespace UnoOnline
             }
 
             // Chuỗi kết nối từ App.config
-            string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\PC\Source\Repos\Uno_Online\UnoClient\Database1.mdf;Integrated Security=True;";
+            string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\ledan\Documents\GitHub\UNOOnline\UNOClient\Database1.mdf;Integrated Security=True;";
 
             try
             {
@@ -56,8 +56,7 @@ namespace UnoOnline
                             // Chuyển sang form Menu.cs
                             Menu menuForm = new Menu();
                             this.Hide(); // Ẩn form Login
-                            menuForm.ShowDialog(); // Hiển thị form Menu
-                            this.Show(); // Hiển thị lại form Login nếu đóng Menu
+                            menuForm.Show(); // Hiển thị form Menu
                         }
                         else
                         {

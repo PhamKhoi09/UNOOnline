@@ -663,17 +663,12 @@ namespace UnoOnline {
 
                 // Remove the card from the player's hand
                 PlayerHandPanel.Controls.Remove(clickedButton);
+                DisableCardAndDrawButton();
             }
             else
             {
                 MessageBox.Show("Invalid move.");
             }
-        }
-
-        private void EndGame()
-        {
-            // Xử lý kết thúc trò chơi
-            MessageBox.Show("Trò chơi kết thúc!");
         }
 
         private Color GetCardColor(Card card)
@@ -689,25 +684,34 @@ namespace UnoOnline {
             }
         }
 
-        private void SkipTurnButton_Click(object sender, EventArgs e)
-        {
-            // Chuyển sang lượt tiếp theo
-        }
-
         private void DrawCardButton_Click(object sender, EventArgs e)
         {
             ClientSocket.SendData(new Message(MessageType.RutBai, new List<string> { Program.player.Name, ((GameManager.Instance.Players[0].Hand.Count) + 1).ToString() }));
             // Cập nhật giao diện
             DisplayPlayerHand(GameManager.Instance.Players[0].Hand);
+            DisableCardAndDrawButton();
         }
 
-        private Card DrawCard()
+        public void EnableCardAndDrawButton()
         {
-            // Hàm giả lập rút bài từ bộ bài (thực tế có thể lấy từ bộ bài chung)
-            return new Card { CardName="Red_2",Color = "Red", Value = "2" };
-
+            // Enable the Draw Card button
+            drawCardButton.Enabled = true;
+            // Enable the Card buttons
+            foreach (Button cardButton in PlayerHandPanel.Controls)
+            {
+                cardButton.Enabled = true;
+            }
         }
-
+        private void DisableCardAndDrawButton()
+        {
+            // Disable the Draw Card button
+            drawCardButton.Enabled = false;
+            // Disable the Card buttons
+            foreach (Button cardButton in PlayerHandPanel.Controls)
+            {
+                cardButton.Enabled = false;
+            }
+        }
         private void InitializeComponent()
         {
             this.drawCardButton = new System.Windows.Forms.Button();
@@ -817,15 +821,6 @@ namespace UnoOnline {
 
             Controls.Remove(cardButton);
             DisplayPlayerHand(GameManager.Instance.Players[0].Hand);
-        }
-        private async void drawCardButton_Click(object sender, EventArgs e)
-        {
-            // Thêm một lá bài mới vào tay người chơi nếu họ không thể ra bài
-            Card newCard = DrawCard();
-            GameManager.Instance.Players[0].Hand.Add(newCard);
-
-            // Animate the card drawing
-            await Task.Run(() => AnimateCardDrawing(newCard));
         }
 
         private async void AnimateCardPlaying(Button cardButton, Card card)

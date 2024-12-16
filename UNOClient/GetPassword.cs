@@ -34,7 +34,7 @@ namespace UnoOnline
             try
             {
                 // Chuỗi kết nối đến database
-                string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\PC\Source\Repos\Uno_Online\UnoClient\Database1.mdf;Integrated Security=True;";
+                string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\ledan\Documents\GitHub\UNOOnline\UNOClientDatabase1.mdf;Integrated Security=True;";
 
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
