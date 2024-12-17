@@ -468,12 +468,15 @@ namespace UnoOnline {
             {
                 if (control is Button btn)
                 {
+                    // Skip color buttons
+                    if (btn.BackColor == Color.Red || btn.BackColor == Color.Green || btn.BackColor == Color.Yellow || btn.BackColor == Color.Blue)
+                        continue;
                     btn.FlatStyle = FlatStyle.Flat;
                     btn.FlatAppearance.BorderSize = 0;
-                    btn.BackColor = Color.FromArgb(52, 152, 219);
                     btn.ForeColor = Color.White;
                     btn.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
                     btn.Cursor = Cursors.Hand;
+                    btn.BackColor = Color.FromArgb(52, 152, 219);
 
                     // Hover effect
                     btn.MouseEnter += (s, e) => btn.BackColor = Color.FromArgb(41, 128, 185);
@@ -490,7 +493,7 @@ namespace UnoOnline {
             InitializeTimer();
             ApplyCustomTheme();
             InitializeCustomComponents();
-            this.ClientSize = new System.Drawing.Size(1260, 720); // Kích thước nội dung (không bao gồm thanh tiêu đề và viền)
+            this.ClientSize = new System.Drawing.Size(945 , 540); // Kích thước nội dung (không bao gồm thanh tiêu đề và viền)
             this.StartPosition = FormStartPosition.CenterScreen; // Hiển thị Form ở giữa màn hình
 
             this.BackgroundImageLayout = ImageLayout.None; // Đảm bảo kích thước chính xác của hình ảnh được giữ nguyên
@@ -517,7 +520,9 @@ namespace UnoOnline {
                 Location = new Point(20, 10),
                 Size = new Size(200, 30),
                 Text = $"Lượt của: {GameManager.Instance.Players[0].Name}",
-                Font = new Font("Arial", 14)
+                Font = new Font("Arial", 14),
+                BackColor = Color.Transparent,  // Optional: Background color
+
             };
             Controls.Add(currentPlayerLabel);
 
@@ -526,11 +531,11 @@ namespace UnoOnline {
             // Label for current card
             currentCardPictureBox = new PictureBox
             {
-                Size = new Size(138, 200),     // Adjust to match your card image size
-                SizeMode = PictureBoxSizeMode.StretchImage, // Ensure the image fits correctly
+                Size = new Size(this.ClientSize.Width / 6, this.ClientSize.Height / 3), // Proportionate size
+                SizeMode = PictureBoxSizeMode.Zoom, // Ensure the image fits correctly
                 BackColor = Color.Transparent,  // Optional: Background color
-                Location = new Point((this.ClientSize.Width - 138) / 2, // Vị trí trung tâm ngang
-                                     (this.ClientSize.Height - 200) / 2 - 50), // Vị trí trung tâm dọc
+                Location = new Point((this.ClientSize.Width - this.ClientSize.Width / 6) / 2, // Center horizontally
+                             (this.ClientSize.Height - this.ClientSize.Height / 3) / 2 - 50), // Center vertically
                 BorderStyle = BorderStyle.FixedSingle,
             };
             Controls.Add(currentCardPictureBox);
@@ -546,14 +551,18 @@ namespace UnoOnline {
                 BackColor = Color.Transparent,
             };
             Controls.Add(PlayerHandPanel);
-
+            
+            currentPlayerLabel.Location = new Point(
+        currentCardPictureBox.Left + (currentCardPictureBox.Width - currentPlayerLabel.Width) / 2,
+        currentCardPictureBox.Top - currentPlayerLabel.Height - 10 // 10 pixels above the PictureBox
+    );
             // Draw card button
             drawCardButton = new Button
             {
                 Size = new Size(100, 40),
                 Text = "Rút bài",
-                Location = new Point(this.ClientSize.Width - 120, (this.ClientSize.Height - 200) / 2 + 50) // Cùng hàng với currentCardPictureBox và sát cạnh phải, dưới playCardButton
-
+                Location = new Point(this.ClientSize.Width - 120, (this.ClientSize.Height - 200) / 2 + 50), // Cùng hàng với currentCardPictureBox và sát cạnh phải, dưới playCardButton
+                BackColor = Color.Empty
             };
             drawCardButton.Click += DrawCardButton_Click;
             Controls.Add(drawCardButton);
@@ -581,10 +590,10 @@ namespace UnoOnline {
 
             Button greenButton = new Button
             {
-                FlatStyle = FlatStyle.Flat,
 
                 Size = new Size(50, 50),
                 BackColor = Color.Green,
+                FlatStyle = FlatStyle.Flat,
                 Location = new Point(currentCardPictureBox.Right + 70, currentCardPictureBox.Top)
             };
             Controls.Add(greenButton);
@@ -770,7 +779,7 @@ namespace UnoOnline {
             // 
             // Form1
             // 
-            this.ClientSize = new System.Drawing.Size(1260, 720);
+            this.ClientSize = new System.Drawing.Size(945, 540);
             this.Name = "Form1";
             this.ResumeLayout(false);
         }
