@@ -7,23 +7,28 @@ namespace UnoOnline
 {
     public class GameManager
     {
+        private static readonly object lockObject = new object();
+        private static GameManager instance;
+
         public List<Player> Players { get; set; }
         public Card CurrentCard { get; set; }
         public int CurrentPlayerIndex { get; set; }
-        private static GameManager instance { get; set; } = new GameManager();
-        private static readonly object lockObject = new object();
+
         public static GameManager Instance
         {
             get
             {
-                lock (lockObject)
+                if (instance == null)
                 {
-                    if (instance == null)
+                    lock (lockObject)
                     {
-                        instance = new GameManager();
+                        if (instance == null)
+                        {
+                            instance = new GameManager();
+                        }
                     }
-                    return instance;
                 }
+                return instance;
             }
         }
 
@@ -129,76 +134,106 @@ namespace UnoOnline
 
         public bool IsValidMove(Card card)
         {
-            return card.Color == CurrentCard.Color || card.Value == CurrentCard.Value || card.Color == "Wild" || (CurrentCard.CardName.Contains("Wild") && card.CardName.Contains("Wild"));
+            return card.Color == Instance.CurrentCard.Color || card.Value == Instance.CurrentCard.Value || card.Color == "Wild" || (Instance.CurrentCard.CardName.Contains("Wild") && card.CardName.Contains("Wild"));
         }
 
         public void HandleUpdate(Message message)
         {
-            //Message nhận được: Update; ID; SoluongBaiConLai; CardName(Nếu đánh bài); color(red/blue/green/yellow nếu trường hợp cardname chứa wild)(Nếu đánh bài)
-            string playerId = message.Data[0];
-            int remainingCards = int.Parse(message.Data[1]);
-            //Tìm người chơi đó trong list player
-            Player player = Instance.Players.FirstOrDefault(p => p.Name == playerId);
-            //Cập nhật số bài đang trên tay họ
-            if (player != null)
+            try
             {
-                player.HandCount = remainingCards;
-            }
-            if (playerId != Program.player.Name)
-            {
-                //Nếu người chơi khác đã đánh bài có chữ số
-                if (message.Data.Count == 3)
+                //Message nhận được: Update; ID; SoluongBaiConLai; CardName(Nếu đánh bài); color(red/blue/green/yellow nếu trường hợp cardname chứa wild)(Nếu đánh bài)
+                string playerId = message.Data[0];
+                int remainingCards = int.Parse(message.Data[1]);
+                //Tìm người chơi đó trong list player
+                Player player = Instance.Players.FirstOrDefault(p => p.Name == playerId);
+                //Cập nhật số bài đang trên tay họ
+                if (player != null)
                 {
-                    CurrentCard.CardName = message.Data[2];
-                    string[] card = message.Data[2].Split('_');
-                    CurrentCard.Color = card[0];
-                    CurrentCard.Value = card[1];
+                    player.HandCount = remainingCards;
                 }
-                //Trường hợp lá đó là lá đổi màu
-                else if (message.Data.Count == 4)
+                if (playerId != Program.player.Name)
                 {
-                    CurrentCard.CardName = message.Data[2];
-                    CurrentCard.Color = message.Data[3];
-                }
-            }
-            //Hiển thị
-            Form1.ActiveForm.Invoke(new Action(() =>
-            {
-                Form1 form1 = (Form1)Application.OpenForms.OfType<Form1>().FirstOrDefault();
-                if (form1 != null)
-                {
-                    form1.UpdateCurrentCardDisplay(CurrentCard);
-                    form1.DisplayPlayerHand(Instance.Players[0].Hand);
-                }
-            }));
-        }
-
-
-        public static void HandleTurnMessage(Message message)
-        {
-            string playerId = message.Data[0];
-            if (playerId == Program.player.Name)
-            {
-                if(Instance.CurrentCard.CardName.Contains("Draw"))
-                {
-                    if(Instance.CurrentCard.CardName.Contains("Wild"))
-                    {//Draw 4
-                        ClientSocket.SendData(new Message(MessageType.SpecialCardEffect, new List<string> { Program.player.Name, (Instance.Players[0].Hand.Count + 4).ToString() }));
+                    //Nếu người chơi khác đã đánh bài có chữ số
+                    if (message.Data.Count == 3)
+                    {
+                        Instance.CurrentCard.CardName = message.Data[2];
+                        string[] card = message.Data[2].Split('_');
+                        Instance.CurrentCard.Color = card[0];
+                        Instance.CurrentCard.Value = card[1];
                     }
-                    else
-                    {//Draw 2
-                        ClientSocket.SendData(new Message(MessageType.SpecialCardEffect, new List<string> { Program.player.Name, (Instance.Players[0].Hand.Count + 2).ToString() }));
+                    //Trường hợp lá đó là lá đổi màu
+                    else if (message.Data.Count == 4)
+                    {
+                        Instance.CurrentCard.CardName = message.Data[2];
+                        Instance.CurrentCard.Color = message.Data[3];
                     }
                 }
-                //Enable EnableCardAndDrawButton
+                //Hiển thị
                 Form1.ActiveForm.Invoke(new Action(() =>
                 {
                     Form1 form1 = (Form1)Application.OpenForms.OfType<Form1>().FirstOrDefault();
                     if (form1 != null)
                     {
-                        form1.EnableCardAndDrawButton();
+                        form1.UpdateCurrentCardDisplay(CurrentCard);
+                        //form1.DisplayPlayerHand(Instance.Players[0].Hand);
                     }
                 }));
+            }
+            catch (NullReferenceException ex)
+            {
+                Console.WriteLine("Đối tượng chưa được khởi tạo: " + ex.Message);
+            }
+        }
+
+
+        public static void HandleTurnMessage(Message message)
+        {
+            try
+            {
+                string playerId = message.Data[0];
+                MessageBox.Show($"Handling Turn message for player: {playerId}");
+
+                if (playerId == Program.player.Name)
+                {
+                    MessageBox.Show("It's the current player's turn.");
+
+                    if (Instance.CurrentCard.CardName.Contains("Draw"))
+                    {
+                        if (Instance.CurrentCard.CardName.Contains("Wild"))
+                        {
+                            // Draw 4
+                            ClientSocket.SendData(new Message(MessageType.SpecialCardEffect, new List<string> { Program.player.Name, (Instance.Players[0].Hand.Count + 4).ToString() }));
+                            //Thoát hàm
+
+                        }
+                        else
+                        {
+                            // Draw 2
+                            ClientSocket.SendData(new Message(MessageType.SpecialCardEffect, new List<string> { Program.player.Name, (Instance.Players[0].Hand.Count + 2).ToString() }));
+                        }
+                    }
+                    else
+                    {
+                        //Enable EnableCardAndDrawButton on form1
+                        Form1 form1 = Application.OpenForms.OfType<Form1>().FirstOrDefault();
+                        if (form1 != null)
+                        {
+                            form1.Invoke(new Action(() =>
+                            {
+                                form1.EnableCardAndDrawButton();
+                            }));
+                        }
+                        else
+                        {
+                            MessageBox.Show("Form1 is null.");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error in HandleTurnMessage: {ex.Message}\n{ex.StackTrace}");
+                throw;
             }
         }
         public static void HandleSpecialDraw(Message message)

@@ -28,12 +28,19 @@ namespace UnoOnline
                 cancellationTokenSource = new CancellationTokenSource();
                 recvThread = new Thread(() => ReceiveData(cancellationTokenSource.Token));
                 recvThread.Start();
+
+                if (gamemanager == null)
+                {
+                    gamemanager = GameManager.Instance;
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Unable to connect to server: " + ex.Message);
             }
         }
+
+
 
         private static void ReceiveData(CancellationToken cancellationToken)
         {
@@ -64,6 +71,8 @@ namespace UnoOnline
         {
             try
             {
+                Console.WriteLine($"Analyzing message: {message}");
+
                 switch (message.Type)
                 {
                     case MessageType.Info:
@@ -106,7 +115,6 @@ namespace UnoOnline
                     case MessageType.Specialdraws:
                         GameManager.HandleSpecialDraw(message);
                         break;
-                    
                     case MessageType.MESSAGE:
                         GameManager.HandleChatMessage(message);
                         break;
@@ -122,20 +130,24 @@ namespace UnoOnline
                     case MessageType.Result:
                         GameManager.HandleResult(message);
                         break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
             }
             catch (Exception ex)
             {
                 if (Application.OpenForms[0].InvokeRequired)
                 {
-                    Application.OpenForms[0].Invoke(new Action(() => MessageBox.Show("Error analyzing data: " + ex.Message)));
+                    Application.OpenForms[0].Invoke(new Action(() => MessageBox.Show($"Error analyzing data: {ex.Message}\n{ex.StackTrace}")));
                 }
                 else
                 {
-                    MessageBox.Show("Error analyzing data: " + ex.Message);
+                    MessageBox.Show($"Error analyzing data: {ex.Message}\n{ex.StackTrace}");
                 }
             }
         }
+
+
 
         public static void SendData(Message message)
         {
