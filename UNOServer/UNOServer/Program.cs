@@ -26,7 +26,8 @@ namespace UNOServer
         private static int DemRestart = 0; //Đếm số lượng đồng ý restart (màn hình kết quả thắng thua)
         private static int DemFinish = 0; //Đếm số lượng muốn finish (màn hình kết quả thắng thua)
         private static string WinnerName = ""; //Lưu tên người thắng
-
+        private static bool TrangThai = false; //Trạng thái game: chưa bắt đầu/đã kết thúc ván game hoặc kết thúc hẳn (false), đang diễn ra (true)
+        
         /* Hàm thiết lập (khởi động) server */
         static void Main(string[] args)
         {
@@ -86,9 +87,44 @@ namespace UNOServer
                 }
                 catch //Xử lý việc người chơi mất kết nối ko gửi DISCONNECT
                 {
+                    //Nếu chỉ có hoặc còn 2 người chơi trong game đang diễn ra mà có người mất kết nối thì đóng kết nối với người còn lại luôn
+                    if (PLAYERLIST.Count == 2 && TrangThai == true)
+                    {
+                        foreach (var user in PLAYERLIST.ToList()) //Duyệt qua các người chơi trong PLAYERLIST
+                        {
+                            if (user.ID != User.ID) //Nếu ID trùng với ID của người chơi không là người muốn ngắt kết nối
+                            {
+                                string SendData = "NotEnoughPlayers;" + user.ID;
+                                byte[] senddata = Encoding.UTF8.GetBytes(SendData);
+                                user.PlayerSocket.Send(senddata);
+                                Console.WriteLine("Quá ít người chơi, không thể bắt đầu");
+                            }
+                            user.PlayerSocket.Shutdown(SocketShutdown.Both); //Ngắt kết nối hai chiều
+                            user.PlayerSocket.Close(); //Đóng socket của người chơi
+                            PLAYERLIST.Remove(user);
+                        }
+                        TrangThai = false;
+                    }
+                    else 
+                    { 
                     User.PlayerSocket.Shutdown(SocketShutdown.Both); //Ngắt kết nối hai chiều
                     User.PlayerSocket.Close(); //Đóng socket của người chơi
-                    PLAYERLIST.Remove(User);
+                    if (PLAYERLIST[HienTai - 1].ID == User.ID && TrangThai == true) //Nếu game đang diễn ra và người đang đến lượt lại mất, update lượt cho người khác
+                    {
+                        if (ChieuDanh == true)
+                            HienTai--;
+                        PLAYERLIST.Remove(User); //Xóa người chơi khỏi danh sách PLAYERLIST
+                        UpdateTurn();
+                    }
+                    else if (TrangThai == true) //Nếu game đang diễn ra và người đang không đến lượt lại mất, update lượt cho người khác
+                    {
+                        if (User.Luot < PLAYERLIST[HienTai - 1].Luot)
+                            HienTai--;
+                        PLAYERLIST.Remove(User); //Xóa người chơi khỏi danh sách PLAYERLIST
+                        UpdateTurn();
+                    }
+                    else PLAYERLIST.Remove(User); //Xóa người chơi khỏi danh sách PLAYERLIST các trường hợp còn lại
+                    }
                 }
             }
         }
@@ -150,7 +186,7 @@ namespace UNOServer
          * START;ID                                                                   | OtherPlayerStat;ID;Luot;SoLuongBai
          * DanhBai;ID;SoLuongBai;CardName;color(wild draw, wild)                      | Boot;ID                                   
          * RutBai;ID;SoLuongBai                                                       | Update;ID;SoluongBai;CardName(Nếu đánh bài);color(wild draw, wild) (Nếu đánh bài)          
-         * SpecialCardEffect;ID;SoLuongBai;                                                 | Turn;ID                      
+         * SpecialCardEffect;ID;SoLuongBai;                                           | Turn;ID                      
          * Chat;ID;<Content>                                                          | CardDraw;ID;CardName                
          * YellUNO;ID                                                                 | Specialdraws;ID;CardName;CardName...
          * DrawPenalty;ID;SoLuongBai;                                                 | End;ID
@@ -158,6 +194,7 @@ namespace UNOServer
          * Restart;ID                                                                 | YellUNOEnable;ID
          * Finish;ID                                                                  | Penalty;ID
          *                                                                            | Result;ID;Diem;Rank
+         *                                                                            | NotEnoughPlayers;ID
          * LƯU Ý: 
          * Bên client sẽ tự động disable nút hô UNO sau khi người chơi ấn nút hô UNO hoặc khi lại đến lượt người chơi đó quên ấn.
          * Bên client sẽ xử lý logic việc show những lá bài có thể đánh hoặc không trong bộ bài dựa trên thông điệp Update lá bài face up card bên server gửi đến (cùng màu, cùng số, đặc biệt trường hợp face up card là lá df, wd phải dựa trên màu người chơi đánh lá đó đã chọn).
@@ -250,13 +287,48 @@ namespace UNOServer
         /* Hàm xử lý yêu cầu ngắt kết nối từ một người chơi (hàm này còn sử dụng cho việc ấn nút thoát ở màn hình xếp hạng) */
         private static void HandleDisconnect(string[] Signal)
         {
-            foreach (var user in PLAYERLIST.ToList()) //Duyệt qua các người chơi trong PLAYERLIST
+            //Nếu chỉ có hoặc còn 2 người chơi trong game đang diễn ra mà lại có người disconnect thì đóng kết nối với người còn lại luôn
+            if (PLAYERLIST.Count == 2 && TrangThai == true)
             {
-                if (user.ID == Signal[1]) //Nếu ID trùng với ID của người chơi muốn ngắt kết nối
+                foreach (var user in PLAYERLIST.ToList()) //Duyệt qua các người chơi trong PLAYERLIST
                 {
+                    if (user.ID != Signal[1]) //Nếu ID trùng với ID của người chơi không là người muốn ngắt kết nối
+                    {
+                        string SendData = "NotEnoughPlayers;" + Signal[1];
+                        byte[] data = Encoding.UTF8.GetBytes(SendData);
+                        user.PlayerSocket.Send(data);
+                        Console.WriteLine("Quá ít người chơi, không thể bắt đầu");
+                    }
                     user.PlayerSocket.Shutdown(SocketShutdown.Both); //Ngắt kết nối hai chiều
                     user.PlayerSocket.Close(); //Đóng socket của người chơi
-                    PLAYERLIST.Remove(user); //Xóa người chơi khỏi danh sách PLAYERLIST
+                    PLAYERLIST.Remove(user);
+                }
+                TrangThai = false;
+            }
+            else
+            {
+                foreach (var user in PLAYERLIST.ToList()) //Duyệt qua các người chơi trong PLAYERLIST
+                {
+                    if (user.ID == Signal[1]) //Nếu ID trùng với ID của người chơi muốn ngắt kết nối
+                    {
+                        user.PlayerSocket.Shutdown(SocketShutdown.Both); //Ngắt kết nối hai chiều
+                        user.PlayerSocket.Close(); //Đóng socket của người chơi                  
+                        if (PLAYERLIST[HienTai - 1].ID == user.ID && TrangThai == true) //Nếu game đang diễn ra và người đang đến lượt lại disconnect, update lượt cho người khác
+                        {
+                            if (ChieuDanh == true)
+                                HienTai--;
+                            PLAYERLIST.Remove(user); //Xóa người chơi khỏi danh sách PLAYERLIST
+                            UpdateTurn();
+                        }
+                        else if (TrangThai == true) //Nếu game đang diễn ra và người đang không đến lượt lại disconnect, update lượt cho người khác
+                        {
+                            if (user.Luot < PLAYERLIST[HienTai - 1].Luot)
+                                HienTai--;
+                            PLAYERLIST.Remove(user); //Xóa người chơi khỏi danh sách PLAYERLIST
+                            UpdateTurn();
+                        }
+                        else PLAYERLIST.Remove(user); //Xóa người chơi khỏi danh sách PLAYERLIST các trường hợp còn lại
+                    }
                 }
             }
         }
@@ -264,6 +336,16 @@ namespace UNOServer
         /* Hàm thiết lập bắt đầu trò chơi */
         private static void SetupGame(string[] Signal, PLAYER User)
         {
+            //Nếu bắt đầu game khi không đủ 2 người trở lên, gửi thông điệp ko thể bắt đầu game
+            if (PLAYERLIST.Count < 2)
+            {
+                string SendData = "NotEnoughPlayers;" + Signal[1];
+                byte[] data = Encoding.UTF8.GetBytes(SendData);
+                User.PlayerSocket.Send(data);
+                Console.WriteLine("Quá ít người chơi, không thể bắt đầu");
+                return;
+            }    
+            TrangThai = true;
             SettingUpTurn(); //Tạo lượt và gán số bài 7 bài cho mỗi người chơi
             PLAYERLIST.Sort((x, y) => x.Luot.CompareTo(y.Luot)); //Sắp xếp lại các người chơi trong PLAYERLIST theo lượt tăng dần
             XaoBai(); //Xào bộ bài
@@ -318,6 +400,7 @@ namespace UNOServer
             PLAYERLIST[HienTai - 1].SoLuongBai = int.Parse(Signal[2]); //Lấy số lượng bài còn lại của người chơi sau khi đánh đó
             if (PLAYERLIST[HienTai - 1].SoLuongBai == 0) //Kiểm tra nếu số lượng bài còn lại của người chơi sau khi đánh đó là 0
             {
+                TrangThai = false;
                 WinnerName = PLAYERLIST[HienTai - 1].ID; //Lưu tên người thắng
                 //Gửi thông điệp cho tất cả người chơi End: kết thúc game và bật màn hình kết quả thắng thua, người thắng (Signal[1]) sẽ mở màn hình thắng, còn lại màn hình thua
                 foreach (var user in PLAYERLIST)
@@ -581,10 +664,17 @@ namespace UNOServer
                         }
                     }
                 }
-                else SetupGame(Signal, User);  //Đủ người thì lại thiết lập bắt đầu trò chơi
-                WinnerName = "";
-                DemFinish = 0;
-                DemRestart = 0;
+                else
+                {
+                    HienTai = 1;
+                    ChieuDanh = true;
+                    RUT = 0;
+                    YELLUNOLIST.Clear();
+                    DemFinish = 0;
+                    DemRestart = 0;
+                    WinnerName = "";
+                    SetupGame(Signal, User);  //Đủ người thì lại thiết lập bắt đầu trò chơi
+                }
             }
         }
     }
