@@ -18,7 +18,6 @@ namespace UnoOnline {
         //private Panel PlayerHandPanel;
         //private Button skipTurnButton;
         //private Button drawCardButton;
-        private CustomCardPanel playerCards;
         private Panel chatPanel;
         private TextBox chatInput;
         private RichTextBox chatHistory;
@@ -491,7 +490,7 @@ namespace UnoOnline {
             InitializeTimer();
             ApplyCustomTheme();
             InitializeCustomComponents();
-            this.ClientSize = new System.Drawing.Size(1600, 900); // Kích thước nội dung (không bao gồm thanh tiêu đề và viền)
+            this.ClientSize = new System.Drawing.Size(1260, 720); // Kích thước nội dung (không bao gồm thanh tiêu đề và viền)
             this.StartPosition = FormStartPosition.CenterScreen; // Hiển thị Form ở giữa màn hình
 
             this.BackgroundImageLayout = ImageLayout.None; // Đảm bảo kích thước chính xác của hình ảnh được giữ nguyên
@@ -523,16 +522,7 @@ namespace UnoOnline {
             Controls.Add(currentPlayerLabel);
 
             // Custom ProgressBar for turn timer
-            turnTimer = new ProgressBar
-            {
-                Location = new Point(300, 10),
-                Size = new Size(200, 20),
-                Maximum = 100,
-                Value = 100,
-                ForeColor = Color.Green
-            };
-            Controls.Add(turnTimer);
-
+            
             // Label for current card
             currentCardPictureBox = new PictureBox
             {
@@ -540,7 +530,7 @@ namespace UnoOnline {
                 SizeMode = PictureBoxSizeMode.StretchImage, // Ensure the image fits correctly
                 BackColor = Color.Transparent,  // Optional: Background color
                 Location = new Point((this.ClientSize.Width - 138) / 2, // Vị trí trung tâm ngang
-                                     (this.ClientSize.Height - 200) / 2), // Vị trí trung tâm dọc
+                                     (this.ClientSize.Height - 200) / 2 - 50), // Vị trí trung tâm dọc
                 BorderStyle = BorderStyle.FixedSingle,
             };
             Controls.Add(currentCardPictureBox);
@@ -548,22 +538,76 @@ namespace UnoOnline {
             // Panel for player hand
             PlayerHandPanel = new FlowLayoutPanel
             {
-                Location = new Point(20, 60),
-                Size = new Size(400, 200)
+                Dock = DockStyle.Bottom,
+                Height = 200, // Increased height
+                AutoScroll = true,
+                WrapContents = false,
+                FlowDirection = FlowDirection.LeftToRight,
+                BackColor = Color.Transparent,
             };
             Controls.Add(PlayerHandPanel);
-
-           
 
             // Draw card button
             drawCardButton = new Button
             {
-                Location = new Point(500, 110),
                 Size = new Size(100, 40),
-                Text = "Rút bài"
+                Text = "Rút bài",
+                Location = new Point(this.ClientSize.Width - 120, (this.ClientSize.Height - 200) / 2 + 50) // Cùng hàng với currentCardPictureBox và sát cạnh phải, dưới playCardButton
+
             };
             drawCardButton.Click += DrawCardButton_Click;
             Controls.Add(drawCardButton);
+
+            yellUNOButton = new Button
+            {
+                Size = new Size(100, 40),
+                Text = "UNO!",
+                Location = new Point(this.ClientSize.Width - 120, (this.ClientSize.Height - 200) / 2 + 100) // Cùng hàng với currentCardPictureBox và sát cạnh phải, dưới playCardButton
+            };
+            yellUNOButton.Click += yellUNOButton_Click;
+            Controls.Add(yellUNOButton);
+
+
+            // Color buttons
+            Button redButton = new Button
+            {
+                Size = new Size(50, 50),
+                BackColor = Color.Red,
+                FlatStyle = FlatStyle.Flat,
+
+                Location = new Point(currentCardPictureBox.Right + 10, currentCardPictureBox.Top)
+            };
+            Controls.Add(redButton);
+
+            Button greenButton = new Button
+            {
+                FlatStyle = FlatStyle.Flat,
+
+                Size = new Size(50, 50),
+                BackColor = Color.Green,
+                Location = new Point(currentCardPictureBox.Right + 70, currentCardPictureBox.Top)
+            };
+            Controls.Add(greenButton);
+
+            Button yellowButton = new Button
+            {
+                FlatStyle = FlatStyle.Flat,
+
+                Size = new Size(50, 50),
+                BackColor = Color.Yellow,
+                Location = new Point(currentCardPictureBox.Right + 10, currentCardPictureBox.Top + 60)
+            };
+            Controls.Add(yellowButton);
+
+            Button blueButton = new Button
+            {
+                FlatStyle = FlatStyle.Flat,
+
+                Size = new Size(50, 50),
+                BackColor = Color.Blue,
+                Location = new Point(currentCardPictureBox.Right + 70, currentCardPictureBox.Top + 60)
+            };
+            Controls.Add(blueButton);
         }
 
         private void yellUNOButton_Click(object sender, EventArgs e)
@@ -606,8 +650,8 @@ namespace UnoOnline {
             PlayerHandPanel.Controls.Clear(); // Clear existing controls
             int xOffset = 10;
             int yOffset = 10;
-            int cardWidth = 80;
-            int cardHeight = 120;
+            int cardWidth = 100; // Increased card width
+            int cardHeight = 150; // Increased card height
 
             foreach (var card in playerHand.ToList())
             {
@@ -714,73 +758,13 @@ namespace UnoOnline {
         }
         private void InitializeComponent()
         {
-            this.drawCardButton = new System.Windows.Forms.Button();
-            this.turnTimer = new System.Windows.Forms.ProgressBar();
-            this.PlayerHandPanel = new System.Windows.Forms.FlowLayoutPanel();
-            this.currentPlayerLabel = new System.Windows.Forms.Label();
-            this.yellUNOButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
-            // 
-            // drawCardButton
-            // 
-            this.drawCardButton.Location = new System.Drawing.Point(0, 0);
-            this.drawCardButton.Name = "drawCardButton";
-            this.drawCardButton.Size = new System.Drawing.Size(75, 23);
-            this.drawCardButton.TabIndex = 7;
-            // 
-            // turnTimer
-            // 
-            this.turnTimer.Location = new System.Drawing.Point(514, 108);
-            this.turnTimer.Name = "turnTimer";
-            this.turnTimer.Size = new System.Drawing.Size(100, 23);
-            this.turnTimer.TabIndex = 5;
-            this.turnTimer.Visible = false;
-            // 
-            // PlayerHandPanel
-            // 
-            this.PlayerHandPanel.BackColor = System.Drawing.Color.Transparent;
-            this.PlayerHandPanel.Location = new System.Drawing.Point(12, 291);
-            this.PlayerHandPanel.Name = "PlayerHandPanel";
-            this.PlayerHandPanel.Size = new System.Drawing.Size(602, 200);
-            this.PlayerHandPanel.TabIndex = 6;
-            // 
-            // currentPlayerLabel
-            // 
-            this.currentPlayerLabel.AutoSize = true;
-            this.currentPlayerLabel.Location = new System.Drawing.Point(519, 150);
-            this.currentPlayerLabel.Name = "currentPlayerLabel";
-            this.currentPlayerLabel.Size = new System.Drawing.Size(0, 16);
-            this.currentPlayerLabel.TabIndex = 4;
-            // 
-            // yellUNOButton
-            // 
-            this.yellUNOButton.Enabled = false;
-            this.yellUNOButton.Location = new System.Drawing.Point(525, 147);
-            this.yellUNOButton.Name = "yellUNOButton";
-            this.yellUNOButton.Size = new System.Drawing.Size(75, 23);
-            this.yellUNOButton.TabIndex = 3;
-            this.yellUNOButton.Text = "UNO";
-            this.yellUNOButton.UseVisualStyleBackColor = true;
-            this.yellUNOButton.Click += new System.EventHandler(this.yellUNOButton_Click);
             // 
             // Form1
             // 
-            this.AutoSize = true;
-            this.BackgroundImage = global::UnoOnline.Properties.Resources.Table_2;
-            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.ClientSize = new System.Drawing.Size(649, 370);
-            this.Controls.Add(this.yellUNOButton);
-            this.Controls.Add(this.PlayerHandPanel);
-            this.Controls.Add(this.turnTimer);
-            this.Controls.Add(this.currentPlayerLabel);
-            this.Controls.Add(this.drawCardButton);
-            this.DoubleBuffered = true;
+            this.ClientSize = new System.Drawing.Size(1260, 720);
             this.Name = "Form1";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
-            this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
-            this.PerformLayout();
-
         }
 
         private Button drawCardButton;
