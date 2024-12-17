@@ -29,33 +29,38 @@ namespace UnoOnline {
         private Panel actionPanel;
         Card currentCard = GameManager.Instance.CurrentCard;
 
-        // update the image displayed in the PictureBox
+        // Update the image displayed in the PictureBox
         public void UpdateCurrentCardDisplay(Card currentCard)
         {
+            if (currentCard == null)
+            {
+                MessageBox.Show("CurrentCard is null in UpdateCurrentCardDisplay.");
+                return;
+            }
+
+            MessageBox.Show($"UpdateCurrentCardDisplay called with: {currentCard.CardName}, {currentCard.Color}, {currentCard.Value}");
+
             string cardImagePath = "";
             if (currentCard.CardName.Contains("Wild"))
             {
                 if (currentCard.Value == "Draw")
                     cardImagePath = Path.Combine("Resources", "CardImages", "Wild_Draw.png");
-                cardImagePath = Path.Combine("Resources", "CardImages", "Wild.png");
+                else
+                    cardImagePath = Path.Combine("Resources", "CardImages", "Wild.png");
             }
             else
-            // Construct the file path for the card image
+            {
+                // Construct the file path for the card image
                 cardImagePath = Path.Combine("Resources", "CardImages", $"{currentCard.Color}_{currentCard.Value}.png");
+            }
 
             if (File.Exists(cardImagePath))
             {
                 // Load the image into the PictureBox
                 currentCardPictureBox.Image = Image.FromFile(cardImagePath);
-            }
-            else
-            {
-                MessageBox.Show($"Card image not found: {cardImagePath}");
-                currentCardPictureBox.Image = null; // Clear the image if not found
+                MessageBox.Show($"Card image updated: {cardImagePath}");
             }
         }
-
-
         private void InitializeAdditionalComponents()
         {
             // Panel chat (bên phải)
@@ -78,11 +83,6 @@ namespace UnoOnline {
                 Dock = DockStyle.Bottom,
                 Height = 30
             };
-
-           
-
-           
-
             // Thêm controls chat vào panel
             chatPanel.Controls.AddRange(new Control[] { chatHistory, chatInput });
 
@@ -698,7 +698,15 @@ namespace UnoOnline {
 
             if (GameManager.Instance.IsValidMove(selectedCard))
             {
-                GameManager.Instance.PlayCard(Program.player, selectedCard);
+                //Gửi thông điệp đến server theo định dạng DanhBai;ID;SoLuongBaiTrenTay;CardName;color
+                if (selectedCard.Color == "Wild")
+                {
+                    //Hiển thị form chọn màu, bên dưới chỉ là giả sử
+                    //string color = Form1.ColorPicker();
+                    string color = "Red";
+                    selectedCard.Color = color;
+                }
+                ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count - 1).ToString(), selectedCard.CardName, selectedCard.Color }));
                 GameManager.Instance.CurrentCard = selectedCard;
                 GameManager.Instance.Players[0].Hand.Remove(selectedCard);
 

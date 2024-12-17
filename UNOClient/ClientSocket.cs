@@ -73,6 +73,12 @@ namespace UnoOnline
             {
                 Console.WriteLine($"Analyzing message: {message}");
 
+                // Ensure GameManager instance is initialized
+                if (gamemanager == null)
+                {
+                    gamemanager = GameManager.Instance;
+                }
+
                 switch (message.Type)
                 {
                     case MessageType.Info:
@@ -146,7 +152,6 @@ namespace UnoOnline
                 }
             }
         }
-
 
 
         public static void SendData(Message message)

@@ -69,8 +69,8 @@ namespace UnoOnline
         private void Menu_FormClosing(object sender, FormClosingEventArgs e)
         {
             //Dừng chạy chương trình khi form đóng, stop debuging
-            //Environment.Exit(0);
-            //Application.Exit();
+            Environment.Exit(0);
+            Application.Exit();
         }
 
         private void BtnExit_Click(object sender, EventArgs e)

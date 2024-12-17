@@ -45,7 +45,6 @@ namespace UnoOnline
         {
             var message = new Message(MessageType.START, new List<string> { Program.player.Name });
             ClientSocket.SendData(message);
-            this.Hide();
         }
 
         private void WaitingLobby_FormClosing(object sender, FormClosingEventArgs e)

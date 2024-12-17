@@ -13,7 +13,7 @@ namespace UnoOnline
         public List<Player> Players { get; set; }
         public Card CurrentCard { get; set; }
         public int CurrentPlayerIndex { get; set; }
-
+        public bool IsOver { get; set; }
         public static GameManager Instance
         {
             get
@@ -41,10 +41,27 @@ namespace UnoOnline
 
         public void UpdateOtherPlayerName(string otherPlayerName)
         {
-            bool playerExists = Instance.Players.Exists(p => p.Name == otherPlayerName);
-            if (!playerExists)
+            lock (lockObject)
             {
-                Instance.Players.Add(new Player(otherPlayerName));
+                if (Players == null)
+                {
+                    Players = new List<Player>();
+                }
+
+                bool playerExists = Players.Exists(p => p.Name == otherPlayerName);
+                if (!playerExists)
+                {
+                    Players.Add(new Player(otherPlayerName));
+                }
+            }
+
+            WaitingLobby form = (WaitingLobby)Application.OpenForms.OfType<WaitingLobby>().FirstOrDefault();
+            if (form != null)
+            {
+                form.Invoke(new Action(() =>
+                {
+                    form.UpdatePlayerList(Players);
+                }));
             }
         }
 
@@ -69,7 +86,7 @@ namespace UnoOnline
                 string[] card = cardData.Split('_');
                 string color = card[0];
                 string value = card[1];
-                if (color =="Wild")
+                if (color =="Wild" && value != "Draw")
                 {
                     value = "Wild";
                 }
@@ -121,15 +138,6 @@ namespace UnoOnline
 
         public void PlayCard(Player player, Card card)
         {
-            //Gửi thông điệp đến server theo định dạng DanhBai;ID;SoLuongBaiTrenTay;CardName;color
-            if(card.Color == "Wild")
-            {
-                //Hiển thị form chọn màu, bên dưới chỉ là giả sử
-                //string color = Form1.ColorPicker();
-                string color = "Red";
-                card.Color = color;
-            }
-            ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { Instance.Players[0].Name, (Instance.Players[0].Hand.Count -1).ToString(), card.CardName, card.Color }));
         }
 
         public bool IsValidMove(Card card)
@@ -141,47 +149,69 @@ namespace UnoOnline
         {
             try
             {
-                //Message nhận được: Update; ID; SoluongBaiConLai; CardName(Nếu đánh bài); color(red/blue/green/yellow nếu trường hợp cardname chứa wild)(Nếu đánh bài)
+                // Message received: Update; ID; RemainingCards; CardName (if a card is played); color (if the card is a wild card)
                 string playerId = message.Data[0];
                 int remainingCards = int.Parse(message.Data[1]);
-                //Tìm người chơi đó trong list player
+
+                // Find the player in the list
                 Player player = Instance.Players.FirstOrDefault(p => p.Name == playerId);
-                //Cập nhật số bài đang trên tay họ
                 if (player != null)
                 {
                     player.HandCount = remainingCards;
                 }
+
                 if (playerId != Program.player.Name)
                 {
-                    //Nếu người chơi khác đã đánh bài có chữ số
+                    // If another player has played a card
                     if (message.Data.Count == 3)
                     {
+                        if (Instance.CurrentCard == null)
+                        {
+                            Instance.CurrentCard = new Card();
+                        }
                         Instance.CurrentCard.CardName = message.Data[2];
                         string[] card = message.Data[2].Split('_');
                         Instance.CurrentCard.Color = card[0];
                         Instance.CurrentCard.Value = card[1];
                     }
-                    //Trường hợp lá đó là lá đổi màu
+                    // If the card is a wild card or draw 4
                     else if (message.Data.Count == 4)
                     {
+                        if (Instance.CurrentCard == null)
+                        {
+                            Instance.CurrentCard = new Card();
+                        }
                         Instance.CurrentCard.CardName = message.Data[2];
+                        string[] card = message.Data[2].Split('_');
+                        Instance.CurrentCard.Value = card[1];
                         Instance.CurrentCard.Color = message.Data[3];
                     }
                 }
-                //Hiển thị
-                Form1.ActiveForm.Invoke(new Action(() =>
+
+                // Update the UI
+                Form1 form1 = (Form1)Application.OpenForms.OfType<Form1>().FirstOrDefault();
+                if (form1 != null)
                 {
-                    Form1 form1 = (Form1)Application.OpenForms.OfType<Form1>().FirstOrDefault();
-                    if (form1 != null)
+                    form1.Invoke(new Action(() =>
                     {
-                        form1.UpdateCurrentCardDisplay(CurrentCard);
-                        //form1.DisplayPlayerHand(Instance.Players[0].Hand);
-                    }
-                }));
+                        if (Instance.CurrentCard != null)
+                        {
+                            form1.UpdateCurrentCardDisplay(Instance.CurrentCard);
+                        }
+                        else
+                        {
+                            MessageBox.Show("CurrentCard is null.");
+                        }
+                    }));
+                }
+                else
+                {
+                    MessageBox.Show("Form1 is null.");
+                }
             }
             catch (NullReferenceException ex)
             {
-                Console.WriteLine("Đối tượng chưa được khởi tạo: " + ex.Message);
+                MessageBox.Show("Object not initialized: " + ex.Message);
             }
         }
 
@@ -267,11 +297,7 @@ namespace UnoOnline
             string[] card = cardName.Split('_');
             string color = card[0];
             string value = card[1];
-            Player player = Instance.Players.FirstOrDefault(p => p.Name == playerName);
-            if (player != null)
-            {
-                player.Hand.Add(new Card(cardName, color, value));
-            }
+            Instance.Players[0].Hand.Add(new Card(cardName, color, value));
         }
         public static void Penalty(Message message)
         {
