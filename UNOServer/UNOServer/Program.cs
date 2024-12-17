@@ -90,9 +90,10 @@ namespace UNOServer
                     //Nếu chỉ có hoặc còn 2 người chơi trong game đang diễn ra mà có người mất kết nối thì đóng kết nối với người còn lại luôn
                     if (PLAYERLIST.Count == 2 && TrangThai == true)
                     {
+                        string ID = User.ID;
                         foreach (var user in PLAYERLIST.ToList()) //Duyệt qua các người chơi trong PLAYERLIST
                         {
-                            if (user.ID != User.ID) //Nếu ID trùng với ID của người chơi không là người muốn ngắt kết nối
+                            if (user.ID != ID) //Nếu ID trùng với ID của người chơi không là người muốn ngắt kết nối
                             {
                                 string SendData = "NotEnoughPlayers;" + user.ID;
                                 byte[] senddata = Encoding.UTF8.GetBytes(SendData);
