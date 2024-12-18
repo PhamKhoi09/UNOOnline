@@ -29,6 +29,8 @@ namespace UnoOnline {
         private Panel actionPanel;
         Card currentCard = GameManager.Instance.CurrentCard;
 
+
+
         // Update the image displayed in the PictureBox
         public void UpdateCurrentCardDisplay(Card currentCard)
         {
@@ -131,227 +133,227 @@ namespace UnoOnline {
             return AutoScroll;
         }
 
-        private void InitializeGameLayout(bool autoScroll)
-        {
-            this.ClientSize = new Size(1280, 720);
-            this.StartPosition = FormStartPosition.CenterScreen;
-            this.TransparencyKey = Color.FromArgb(0, 0, 0); // Màu trong suốt
+    //    private void InitializeGameLayout(bool autoScroll)
+    //    {
+    //        this.ClientSize = new Size(1280, 720);
+    //        this.StartPosition = FormStartPosition.CenterScreen;
+    //        this.TransparencyKey = Color.FromArgb(0, 0, 0); // Màu trong suốt
 
-            // Panel chứa bài của người chơi (có tính năng cuộn)
-            Panel playerHandPanel = new Panel
-            {
-                Location = new Point(180, this.ClientSize.Height - 150),
-                Size = new Size(920, 130), // Kích thước panel
-                AutoScroll = true, // Bật tính năng cuộn
-                Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
-                BackColor = Color.Transparent // Màu nền
+    //        // Panel chứa bài của người chơi (có tính năng cuộn)
+    //        Panel playerHandPanel = new Panel
+    //        {
+    //            Location = new Point(180, this.ClientSize.Height - 150),
+    //            Size = new Size(920, 130), // Kích thước panel
+    //            AutoScroll = true, // Bật tính năng cuộn
+    //            Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
+    //            BackColor = Color.Transparent // Màu nền
 
-            };
-
-
-
-            // Thêm panel vào form
-            this.Controls.Add(playerHandPanel);
-
-            // Tạo và thêm thẻ vào playerHandPanel
-            int cardWidth = 70; // Kích thước thẻ
-            int cardHeight = 100; // Kích thước thẻ
-            int spacing = 10; // Khoảng cách giữa các thẻ
-            int numberOfCards = 15; // Số thẻ bạn muốn hiển thị
-
-            for (int i = 0; i < numberOfCards; i++)
-            {
-                CustomCard card = new CustomCard
-                {
-                    Size = new Size(cardWidth, cardHeight),
-                    Location = new Point(i * (cardWidth + spacing), 0) // Sắp xếp theo hàng ngang
-                };
-                playerHandPanel.Controls.Add(card);
-            }
-
-            // Panel hiển thị bài trên bàn (ở giữa)
-            CustomCardPanel tableDeckPanel = new CustomCardPanel
-            {
-                Location = new Point(540, 260),
-                Size = new Size(200, 200),
-                Anchor = AnchorStyles.None,
-                BackColor = Color.FromArgb(100, 0, 0, 0) // Màu nền với độ trong suốt
-
-
-            };
-
-            // Panel hiển thị người chơi đối thủ (phía trên)
-            CustomCardPanel opponentPanel = new CustomCardPanel
-            {
-                Location = new Point(180, 20),
-                Size = new Size(920, 130),
-                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
-                BackColor = Color.FromArgb(100, 0, 0, 0) // Màu nền với độ trong suốt
-
-            };
-
-
-            // Panel thông tin game bên trái
-            Panel gameInfoPanel = new Panel
-            {
-                Location = new Point(20, 160),
-                Size = new Size(150, 400),
-                Anchor = AnchorStyles.Left,
-                BackColor = Color.FromArgb(100, 0, 0, 0),
-
-            };
+    //        };
 
 
 
-            // Thêm các controls thông tin vào gameInfoPanel
-            Label currentPlayerLabel = new Label
-            {
-                Location = new Point(10, 10),
-                Size = new Size(130, 25),
-                Text = "Current Player:",
-                ForeColor = Color.White,
-                Font = new Font("Segoe UI", 12F)
-            };
+    //        // Thêm panel vào form
+    //        this.Controls.Add(playerHandPanel);
 
-            Label scoreLabel = new Label
-            {
-                Location = new Point(10, 45),
-                Size = new Size(130, 25),
-                Text = "Score: 0",
-                ForeColor = Color.White,
-                Font = new Font("Segoe UI", 12F)
-            };
+    //        // Tạo và thêm thẻ vào playerHandPanel
+    //        int cardWidth = 70; // Kích thước thẻ
+    //        int cardHeight = 100; // Kích thước thẻ
+    //        int spacing = 10; // Khoảng cách giữa các thẻ
+    //        int numberOfCards = 15; // Số thẻ bạn muốn hiển thị
 
-            // Panel chứa các nút điều khiển (bên phải)
-            Panel controlPanel = new Panel
-            {
-                Location = new Point(this.ClientSize.Width - 170, 160),
-                Size = new Size(150, 400),
-                Anchor = AnchorStyles.Right,
-                BackColor = Color.FromArgb(100, 0, 0, 0)
-            };
+    //        for (int i = 0; i < numberOfCards; i++)
+    //        {
+    //            CustomCard card = new CustomCard
+    //            {
+    //                Size = new Size(cardWidth, cardHeight),
+    //                Location = new Point(i * (cardWidth + spacing), 0) // Sắp xếp theo hàng ngang
+    //            };
+    //            playerHandPanel.Controls.Add(card);
+    //        }
 
-            // Thêm các nút vào controlPanel
-            Button drawCardButton = new Button
-            {
-                Location = new Point(10, 10),
-                Size = new Size(130, 40),
-                Text = "Draw Card",
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.FromArgb(100, 0, 122, 204),
-                ForeColor = Color.White,
-                Font = new Font("Segoe UI", 12F)
-            };
+    //        // Panel hiển thị bài trên bàn (ở giữa)
+    //        CustomCardPanel tableDeckPanel = new CustomCardPanel
+    //        {
+    //            Location = new Point(540, 260),
+    //            Size = new Size(200, 200),
+    //            Anchor = AnchorStyles.None,
+    //            BackColor = Color.FromArgb(100, 0, 0, 0) // Màu nền với độ trong suốt
 
-            Button unoButton = new Button
-            {
-                Location = new Point(10, 60),
-                Size = new Size(130, 40),
-                Text = "UNO!",
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.FromArgb(100, 204, 0, 0),
-                ForeColor = Color.White,
-                Font = new Font("Segoe UI", 12F)
-            };
 
-            // Thêm chat box và input (phía dưới bên phải)
-            RichTextBox chatBox = new RichTextBox
-            {
-                Location = new Point(this.ClientSize.Width - 300, this.ClientSize.Height - 200),
-                Size = new Size(280, 150),
-                Anchor = AnchorStyles.Bottom | AnchorStyles.Right,
-                BackColor = Color.FromArgb(150, 255, 255, 255),
-                ReadOnly = true
-            };
+    //        };
 
-            TextBox chatInput = new TextBox
-            {
-                Location = new Point(this.ClientSize.Width - 300, this.ClientSize.Height - 40),
-                Size = new Size(280, 30),
-                Anchor = AnchorStyles.Bottom | AnchorStyles.Right,
-                BackColor = Color.FromArgb(150, 255, 255, 255)
-            };
+    //        // Panel hiển thị người chơi đối thủ (phía trên)
+    //        CustomCardPanel opponentPanel = new CustomCardPanel
+    //        {
+    //            Location = new Point(180, 20),
+    //            Size = new Size(920, 130),
+    //            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
+    //            BackColor = Color.FromArgb(100, 0, 0, 0) // Màu nền với độ trong suốt
 
-            // Thêm các controls vào form
-            this.Controls.AddRange(new Control[] {
-                playerHandPanel,
-                tableDeckPanel,
-                opponentPanel,
-                gameInfoPanel,
-                controlPanel,
-                chatBox,
-                chatInput
-             });
+    //        };
 
-            // Thêm controls vào các panel
-            gameInfoPanel.Controls.AddRange(new Control[] {
-        currentPlayerLabel,
-        scoreLabel
-    });
-            controlPanel.Controls.AddRange(new Control[] {
-        drawCardButton,
-        unoButton
-    });
 
-            drawCardButton.Click += DrawCardButton_Click;
+    //        // Panel thông tin game bên trái
+    //        Panel gameInfoPanel = new Panel
+    //        {
+    //            Location = new Point(20, 160),
+    //            Size = new Size(150, 400),
+    //            Anchor = AnchorStyles.Left,
+    //            BackColor = Color.FromArgb(100, 0, 0, 0),
+
+    //        };
+
+
+
+    //        // Thêm các controls thông tin vào gameInfoPanel
+    //        Label currentPlayerLabel = new Label
+    //        {
+    //            Location = new Point(10, 10),
+    //            Size = new Size(130, 25),
+    //            Text = "Current Player:",
+    //            ForeColor = Color.White,
+    //            Font = new Font("Segoe UI", 12F)
+    //        };
+
+    //        Label scoreLabel = new Label
+    //        {
+    //            Location = new Point(10, 45),
+    //            Size = new Size(130, 25),
+    //            Text = "Score: 0",
+    //            ForeColor = Color.White,
+    //            Font = new Font("Segoe UI", 12F)
+    //        };
+
+    //        // Panel chứa các nút điều khiển (bên phải)
+    //        Panel controlPanel = new Panel
+    //        {
+    //            Location = new Point(this.ClientSize.Width - 170, 160),
+    //            Size = new Size(150, 400),
+    //            Anchor = AnchorStyles.Right,
+    //            BackColor = Color.FromArgb(100, 0, 0, 0)
+    //        };
+
+    //        // Thêm các nút vào controlPanel
+    //        Button drawCardButton = new Button
+    //        {
+    //            Location = new Point(10, 10),
+    //            Size = new Size(130, 40),
+    //            Text = "Draw Card",
+    //            FlatStyle = FlatStyle.Flat,
+    //            BackColor = Color.FromArgb(100, 0, 122, 204),
+    //            ForeColor = Color.White,
+    //            Font = new Font("Segoe UI", 12F)
+    //        };
+
+    //        Button unoButton = new Button
+    //        {
+    //            Location = new Point(10, 60),
+    //            Size = new Size(130, 40),
+    //            Text = "UNO!",
+    //            FlatStyle = FlatStyle.Flat,
+    //            BackColor = Color.FromArgb(100, 204, 0, 0),
+    //            ForeColor = Color.White,
+    //            Font = new Font("Segoe UI", 12F)
+    //        };
+
+    //        // Thêm chat box và input (phía dưới bên phải)
+    //        RichTextBox chatBox = new RichTextBox
+    //        {
+    //            Location = new Point(this.ClientSize.Width - 300, this.ClientSize.Height - 200),
+    //            Size = new Size(280, 150),
+    //            Anchor = AnchorStyles.Bottom | AnchorStyles.Right,
+    //            BackColor = Color.FromArgb(150, 255, 255, 255),
+    //            ReadOnly = true
+    //        };
+
+    //        TextBox chatInput = new TextBox
+    //        {
+    //            Location = new Point(this.ClientSize.Width - 300, this.ClientSize.Height - 40),
+    //            Size = new Size(280, 30),
+    //            Anchor = AnchorStyles.Bottom | AnchorStyles.Right,
+    //            BackColor = Color.FromArgb(150, 255, 255, 255)
+    //        };
+
+    //        // Thêm các controls vào form
+    //        this.Controls.AddRange(new Control[] {
+    //            playerHandPanel,
+    //            tableDeckPanel,
+    //            opponentPanel,
+    //            gameInfoPanel,
+    //            controlPanel,
+    //            chatBox,
+    //            chatInput
+    //         });
+
+    //        // Thêm controls vào các panel
+    //        gameInfoPanel.Controls.AddRange(new Control[] {
+    //    currentPlayerLabel,
+    //    scoreLabel
+    //});
+    //        controlPanel.Controls.AddRange(new Control[] {
+    //    drawCardButton,
+    //    unoButton
+    //});
+
+    //        drawCardButton.Click += DrawCardButton_Click;
             
-            // Main layout chia làm 3 phần: status, game area, player cards
-            mainLayout = new TableLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                RowCount = 3,
-                ColumnCount = 1,
-                BackColor = Color.FromArgb(41, 128, 185) // Màu xanh dương đậm
-            };
+    //        // Main layout chia làm 3 phần: status, game area, player cards
+    //        mainLayout = new TableLayoutPanel
+    //        {
+    //            Dock = DockStyle.Fill,
+    //            RowCount = 3,
+    //            ColumnCount = 1,
+    //            BackColor = Color.FromArgb(41, 128, 185) // Màu xanh dương đậm
+    //        };
 
-            // Game status panel
-            gameStatusPanel = new Panel
-            {
-                Height = 60,
-                Dock = DockStyle.Top,
-                BackColor = Color.FromArgb(52, 73, 94)
-            };
+    //        // Game status panel
+    //        gameStatusPanel = new Panel
+    //        {
+    //            Height = 60,
+    //            Dock = DockStyle.Top,
+    //            BackColor = Color.FromArgb(52, 73, 94)
+    //        };
 
-            // Khu vực chơi bài chính
-            Panel gameArea = new Panel
-            {
-                Dock = DockStyle.Fill,
-                Padding = new Padding(20)
-            };
+    //        // Khu vực chơi bài chính
+    //        Panel gameArea = new Panel
+    //        {
+    //            Dock = DockStyle.Fill,
+    //            Padding = new Padding(20)
+    //        };
 
-            // Panel chứa bài của người chơi
-            playerCardsPanel = new FlowLayoutPanel
-            {
-                Dock = DockStyle.Bottom,
-                Height = 150,
-                FlowDirection = FlowDirection.LeftToRight,
-                WrapContents = false,
-                AutoScroll = true,
-                Location = new Point(0, 750), // Vị trí nằm phía dưới cửa sổ (1600x900)
-                Size = new Size(1600, 150), // Kích thước Panel
-                BorderStyle = BorderStyle.FixedSingle, // Đặt viền cho Panel để dễ quan sát
-                BackColor = Color.LightGray // Màu nền tùy chọn
-            };
+    //        // Panel chứa bài của người chơi
+    //        playerCardsPanel = new FlowLayoutPanel
+    //        {
+    //            Dock = DockStyle.Bottom,
+    //            Height = 150,
+    //            FlowDirection = FlowDirection.LeftToRight,
+    //            WrapContents = false,
+    //            AutoScroll = true,
+    //            Location = new Point(0, 750), // Vị trí nằm phía dưới cửa sổ (1600x900)
+    //            Size = new Size(1600, 150), // Kích thước Panel
+    //            BorderStyle = BorderStyle.FixedSingle, // Đặt viền cho Panel để dễ quan sát
+    //            BackColor = Color.LightGray // Màu nền tùy chọn
+    //        };
 
-            // Panel chứa các nút action
-            actionPanel = new Panel
-            {
-                Dock = DockStyle.Right,
-                Width = 150,
-                BackColor = Color.FromArgb(44, 62, 80)
-            };
+    //        // Panel chứa các nút action
+    //        actionPanel = new Panel
+    //        {
+    //            Dock = DockStyle.Right,
+    //            Width = 150,
+    //            BackColor = Color.FromArgb(44, 62, 80)
+    //        };
 
-            // Setup các controls
-            SetupGameStatusPanel();
-            SetupActionPanel();
+    //        // Setup các controls
+    //        SetupGameStatusPanel();
+    //        SetupActionPanel();
 
-            // Thêm vào form
-            mainLayout.Controls.Add(gameStatusPanel, 0, 0);
-            mainLayout.Controls.Add(gameArea, 0, 1);
-            mainLayout.Controls.Add(playerCardsPanel, 0, 2);
+    //        // Thêm vào form
+    //        mainLayout.Controls.Add(gameStatusPanel, 0, 0);
+    //        mainLayout.Controls.Add(gameArea, 0, 1);
+    //        mainLayout.Controls.Add(playerCardsPanel, 0, 2);
 
-            this.Controls.Add(mainLayout);
-        }
+    //        this.Controls.Add(mainLayout);
+    //    }
 
         private Panel CreateControlPanel()
         {
@@ -514,31 +516,27 @@ namespace UnoOnline {
         }
         private void InitializeGameBoard()
         {
-            // Label for current player
-            currentPlayerLabel = new Label
-            {
-                Location = new Point(20, 10),
-                Size = new Size(200, 30),
-                Text = $"Lượt của: {GameManager.Instance.Players[0].Name}",
-                Font = new Font("Arial", 14),
-                BackColor = Color.Transparent,  // Optional: Background color
-
-            };
-            Controls.Add(currentPlayerLabel);
-
-            // Custom ProgressBar for turn timer
-            
-            // Label for current card
             currentCardPictureBox = new PictureBox
             {
                 Size = new Size(this.ClientSize.Width / 6, this.ClientSize.Height / 3), // Proportionate size
                 SizeMode = PictureBoxSizeMode.Zoom, // Ensure the image fits correctly
                 BackColor = Color.Transparent,  // Optional: Background color
                 Location = new Point((this.ClientSize.Width - this.ClientSize.Width / 6) / 2, // Center horizontally
-                             (this.ClientSize.Height - this.ClientSize.Height / 3) / 2 - 50), // Center vertically
+                                     (this.ClientSize.Height - this.ClientSize.Height / 3) / 2 - 35), // Center vertically
                 BorderStyle = BorderStyle.FixedSingle,
             };
             Controls.Add(currentCardPictureBox);
+
+            // Label for current player
+            currentPlayerLabel = new Label
+            {
+                Size = new Size(200, 30),
+                Text = $"Lượt của: {GameManager.Instance.Players[0].Name}",
+                Font = new Font("Arial", 14),
+                BackColor = Color.Transparent,  // Optional: Background color
+                Location = new Point(currentCardPictureBox.Left + (currentCardPictureBox.Width - 200) / 2, currentCardPictureBox.Top - 40) // Centered above the PictureBox
+            };
+            Controls.Add(currentPlayerLabel);
 
             // Panel for player hand
             PlayerHandPanel = new FlowLayoutPanel
@@ -551,17 +549,13 @@ namespace UnoOnline {
                 BackColor = Color.Transparent,
             };
             Controls.Add(PlayerHandPanel);
-            
-            currentPlayerLabel.Location = new Point(
-        currentCardPictureBox.Left + (currentCardPictureBox.Width - currentPlayerLabel.Width) / 2,
-        currentCardPictureBox.Top - currentPlayerLabel.Height - 10 // 10 pixels above the PictureBox
-    );
+
             // Draw card button
             drawCardButton = new Button
             {
                 Size = new Size(100, 40),
                 Text = "Rút bài",
-                Location = new Point(this.ClientSize.Width - 120, (this.ClientSize.Height - 200) / 2 + 50), // Cùng hàng với currentCardPictureBox và sát cạnh phải, dưới playCardButton
+                Location = new Point(this.ClientSize.Width - 120, (this.ClientSize.Height - 200) / 2 + 50), // Align with currentCardPictureBox and right edge
                 BackColor = Color.Empty
             };
             drawCardButton.Click += DrawCardButton_Click;
@@ -571,11 +565,10 @@ namespace UnoOnline {
             {
                 Size = new Size(100, 40),
                 Text = "UNO!",
-                Location = new Point(this.ClientSize.Width - 120, (this.ClientSize.Height - 200) / 2 + 100) // Cùng hàng với currentCardPictureBox và sát cạnh phải, dưới playCardButton
+                Location = new Point(this.ClientSize.Width - 120, (this.ClientSize.Height - 200) / 2 + 100) // Align with currentCardPictureBox and right edge
             };
             yellUNOButton.Click += yellUNOButton_Click;
             Controls.Add(yellUNOButton);
-
 
             // Color buttons
             Button redButton = new Button
@@ -583,40 +576,39 @@ namespace UnoOnline {
                 Size = new Size(50, 50),
                 BackColor = Color.Red,
                 FlatStyle = FlatStyle.Flat,
-
-                Location = new Point(currentCardPictureBox.Right + 10, currentCardPictureBox.Top)
+                Location = new Point(currentCardPictureBox.Right + 10, currentCardPictureBox.Bottom - 110)
             };
             Controls.Add(redButton);
 
             Button greenButton = new Button
             {
-
                 Size = new Size(50, 50),
                 BackColor = Color.Green,
                 FlatStyle = FlatStyle.Flat,
-                Location = new Point(currentCardPictureBox.Right + 70, currentCardPictureBox.Top)
+                Location = new Point(currentCardPictureBox.Right + 70, currentCardPictureBox.Bottom - 110)
             };
             Controls.Add(greenButton);
 
             Button yellowButton = new Button
             {
                 FlatStyle = FlatStyle.Flat,
-
                 Size = new Size(50, 50),
                 BackColor = Color.Yellow,
-                Location = new Point(currentCardPictureBox.Right + 10, currentCardPictureBox.Top + 60)
+                Location = new Point(currentCardPictureBox.Right + 10, currentCardPictureBox.Bottom - 50)
             };
             Controls.Add(yellowButton);
 
             Button blueButton = new Button
             {
                 FlatStyle = FlatStyle.Flat,
-
                 Size = new Size(50, 50),
                 BackColor = Color.Blue,
-                Location = new Point(currentCardPictureBox.Right + 70, currentCardPictureBox.Top + 60)
+                Location = new Point(currentCardPictureBox.Right + 70, currentCardPictureBox.Bottom - 50)
             };
             Controls.Add(blueButton);
+
+            // Initialize deck images
+            InitializeDeckImages();
         }
 
         private void yellUNOButton_Click(object sender, EventArgs e)
@@ -882,6 +874,40 @@ namespace UnoOnline {
         private void Form1_Load(object sender, EventArgs e)
         {
 
+        }
+        private void InitializeDeckImages()
+        {
+            // Load the image from the specified path
+            Image deckImage = Image.FromFile(@"Resources\CardImages\Deck.png");
+
+            // Create and configure the PictureBox controls
+            for (int i = 0; i < 3; i++)
+            {
+                PictureBox deckPictureBox = new PictureBox
+                {
+                    Size = new Size(100, 150), // Set the size of the PictureBox
+                    Image = deckImage, // Set the image
+                    SizeMode = PictureBoxSizeMode.StretchImage, // Ensure the image fits correctly
+                    Location = new Point(this.ClientSize.Width - (120 + i * 110), 20), // Position them horizontally with spacing on the top-right side
+                    Anchor = AnchorStyles.Top | AnchorStyles.Right, // Anchor to the top-right corner
+                    BorderStyle = BorderStyle.FixedSingle // Optional: Add a border for better visibility
+                };
+
+                // Create and configure the Label controls
+                Label deckLabel = new Label
+                {
+                    Size = new Size(100, 20), // Set the size of the Label
+                    Text = $"Người chơi {i + 1}", // Set the text of the Label
+                    TextAlign = ContentAlignment.MiddleCenter, // Center the text
+                    Location = new Point(deckPictureBox.Left, deckPictureBox.Bottom + 5), // Position below the PictureBox
+                    Anchor = AnchorStyles.Top | AnchorStyles.Right, // Anchor to the top-right corner
+                    BackColor = Color.White, // Optional: Set the background color
+                };
+
+                // Add the PictureBox and Label to the form's controls
+                Controls.Add(deckPictureBox);
+                Controls.Add(deckLabel);
+            }
         }
     }
 
