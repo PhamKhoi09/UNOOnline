@@ -37,6 +37,7 @@ namespace UnoOnline
             Players = new List<Player>();
             CurrentCard = new Card();
             CurrentPlayerIndex = 0;
+            IsSpecialDraw = false;
         }
 
         public void UpdateOtherPlayerName(string otherPlayerName)
@@ -135,23 +136,23 @@ namespace UnoOnline
                 }));
             }
         }
-
-        public void PlayCard(Player player, Card card)
-        {
-        }
-
         public bool IsValidMove(Card card)
         {
             return card.Color == Instance.CurrentCard.Color || card.Value == Instance.CurrentCard.Value || card.Color == "Wild" || (Instance.CurrentCard.CardName.Contains("Wild") && card.CardName.Contains("Wild"));
         }
-
         public void HandleUpdate(Message message)
         {
             try
             {
+                string[] data = message.Data.ToArray();
                 // Message received: Update; ID; RemainingCards; CardName (if a card is played); color (if the card is a wild card)
-                string playerId = message.Data[0];
-                if (!int.TryParse(message.Data[1], out int remainingCards))
+                if (data.Length < 2)
+                {
+                    throw new ArgumentException("Invalid message data: not enough elements.");
+                }
+
+                string playerId = data[0];
+                if (!int.TryParse(data[1], out int remainingCards))
                 {
                     throw new FormatException("Input string was not in a correct format.");
                 }
@@ -166,36 +167,37 @@ namespace UnoOnline
                 if (playerId != Program.player.Name)
                 {
                     // If another player has played a card
-                    if (message.Data.Count == 3)
+                    if (data.Length == 3)
                     {
                         if (Instance.CurrentCard == null)
                         {
                             Instance.CurrentCard = new Card();
                         }
-                        Instance.CurrentCard.CardName = message.Data[2];
-                        string[] card = message.Data[2].Split('_');
+                        Instance.CurrentCard.CardName = data[2];
+                        string[] card = data[2].Split('_');
                         if (card.Length < 2)
                         {
-                            throw new ArgumentException($"Invalid card data: {message.Data[2]}");
+                            throw new ArgumentException($"Invalid card data: {data[2]}");
                         }
                         Instance.CurrentCard.Color = card[0];
                         Instance.CurrentCard.Value = card[1];
                     }
                     // If the card is a wild card or draw 4
-                    else if (message.Data.Count == 4)
+                    else if (data.Length == 4)
                     {
+                        IsSpecialDraw = true;
                         if (Instance.CurrentCard == null)
                         {
                             Instance.CurrentCard = new Card();
                         }
-                        Instance.CurrentCard.CardName = message.Data[2];
-                        string[] card = message.Data[2].Split('_');
+                        Instance.CurrentCard.CardName = data[2];
+                        string[] card = data[2].Split('_');
                         if (card.Length < 2)
                         {
-                            throw new ArgumentException($"Invalid card data: {message.Data[2]}");
+                            throw new ArgumentException($"Invalid card data: {data[2]}");
                         }
                         Instance.CurrentCard.Value = card[1];
-                        Instance.CurrentCard.Color = message.Data[3];
+                        Instance.CurrentCard.Color = data[3];
                     }
                 }
 
@@ -237,8 +239,6 @@ namespace UnoOnline
                 MessageBox.Show("Unexpected error: " + ex.Message);
             }
         }
-
-
         public static void HandleTurnMessage(Message message)
         {
             try
@@ -249,7 +249,7 @@ namespace UnoOnline
                 {
                     MessageBox.Show("It's the current player's turn.");
 
-                    if (Instance.CurrentCard.CardName.Contains("Draw") ) //Bị rút bài
+                    if (Instance.CurrentCard.CardName.Contains("Draw") && Instance.IsSpecialDraw == true ) //Bị rút bài
                     {
                         if (Instance.CurrentCard.CardName.Contains("Wild"))
                             // Draw 4
@@ -282,19 +282,24 @@ namespace UnoOnline
                 throw;
             }
         }
+
         public static void HandleSpecialDraw(Message message)
         {
-            //Specialdraws;anle;Yellow_Skip_;Green_Draw;Green_7;Red_3;
-            string playerId = message.Data[0];
-            Player player = Instance.Players.FirstOrDefault(p => p.Name == playerId);
-            string[] data = message.Data.ToArray();
-            List<string> cardNames = new List<string>(data.Skip(1));
-
             try
             {
-                var cardsToAdd = cardNames.Select(cardData =>
+                // Specialdraws;anle;Yellow_Skip_;Green_Draw;Green_7;Red_3;
+                string[] data = message.Data.ToArray();
+                if (data.Length < 2)
                 {
-                    string[] card = cardData.Split('_');
+                    throw new ArgumentException("Invalid message data: not enough elements.");
+                }
+
+                List<string> cardNames = new List<string>(data.Skip(1)); // Skip the first part which is not card data
+
+                // Add the cards to the player's hand
+                Instance.Players[0].Hand.AddRange(cardNames.Select(cardData =>
+                {
+                    string[] card = cardData.Split(new[] { '_' }, StringSplitOptions.RemoveEmptyEntries);
                     if (card.Length < 2)
                     {
                         throw new ArgumentException($"Invalid card data: {cardData}");
@@ -306,32 +311,28 @@ namespace UnoOnline
                         value = "Wild";
                     }
                     return new Card(cardData, color, value);
-                }).ToList();
+                }).ToList());
 
-                player.Hand.AddRange(cardsToAdd);
+                Form1 form1 = Application.OpenForms.OfType<Form1>().FirstOrDefault();
+                if (form1 != null)
+                {
+                    form1.Invoke(new Action(() =>
+                    {
+                        form1.DisplayPlayerHand(Instance.Players[0].Hand);
+                    }));
+                }
+                else
+                {
+                    MessageBox.Show("Form1 is null.");
+                }
             }
             catch (ArgumentException ex)
             {
-                MessageBox.Show($"Error processing card data: {ex.Message}");
-                return;
+                MessageBox.Show("Invalid card data: " + ex.Message);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Unexpected error: {ex.Message}");
-                return;
-            }
-
-            Form1 form1 = Application.OpenForms.OfType<Form1>().FirstOrDefault();
-            if (form1 != null)
-            {
-                form1.Invoke(new Action(() =>
-                {
-                    form1.DisplayPlayerHand(player.Hand);
-                }));
-            }
-            else
-            {
-                MessageBox.Show("Form1 is null.");
+                MessageBox.Show("Unexpected error: " + ex.Message);
             }
         }
         public static void HandleCardDraw(Message message)

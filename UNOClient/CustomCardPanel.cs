@@ -122,18 +122,6 @@ public class CustomCardPanel : Panel
         return null; // Placeholder
     }
 
-    protected override void OnMouseClick(MouseEventArgs e)
-    {
-        base.OnMouseClick(e);
-
-        int clickedCardIndex = (e.X / CARD_SPACING);
-        if (clickedCardIndex >= 0 && clickedCardIndex < cards.Count)
-        {
-            // Call PlayCard method in GameManager
-            gameManager.PlayCard(currentPlayer, cards[clickedCardIndex]);
-        }
-    }
-
     private Card _card;
     private bool _isPlayable;
     private bool _isHovered;

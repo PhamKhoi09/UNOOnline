@@ -72,8 +72,6 @@ namespace UnoOnline
         {
             try
             {
-                Console.WriteLine($"Analyzing message: {message}");
-
                 // Ensure GameManager instance is initialized
                 if (gamemanager == null)
                 {
@@ -145,6 +143,7 @@ namespace UnoOnline
                         throw new ArgumentOutOfRangeException();
                 }
             }
+
             catch (Exception ex)
             {
                 if (Application.OpenForms[0].InvokeRequired)
@@ -156,6 +155,7 @@ namespace UnoOnline
                     MessageBox.Show($"Error analyzing data: {ex.Message}\n{ex.StackTrace}");
                 }
             }
+
         }
 
 
