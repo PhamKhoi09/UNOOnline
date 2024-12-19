@@ -39,9 +39,6 @@ namespace UnoOnline {
                 MessageBox.Show("CurrentCard is null in UpdateCurrentCardDisplay.");
                 return;
             }
-
-            MessageBox.Show($"UpdateCurrentCardDisplay called with: {currentCard.CardName}, {currentCard.Color}, {currentCard.Value}");
-
             string cardImagePath = "";
             if (currentCard.CardName.Contains("Wild"))
             {
@@ -60,7 +57,6 @@ namespace UnoOnline {
             {
                 // Load the image into the PictureBox
                 currentCardPictureBox.Image = Image.FromFile(cardImagePath);
-                MessageBox.Show($"Card image updated: {cardImagePath}");
             }
         }
         private void InitializeAdditionalComponents()
@@ -122,7 +118,6 @@ namespace UnoOnline {
                 BeginInvoke(new Action(() => AddChatMessage(sender, message)));
                 return;
             }
-            ClientSocket.SendData(new Message(MessageType.Chat, new List<string> { Program.player.Name, message }));
             string formattedMessage = $"[{sender}]: {message}\n";
             chatHistory.AppendText(formattedMessage);
             chatHistory.ScrollToCaret();
@@ -514,6 +509,15 @@ namespace UnoOnline {
         private void InitializeGame()
         {
         }
+        public static void UpdateCurrentPlayerLabel(string playerName)
+        {
+            Form1 form = Application.OpenForms.OfType<Form1>().FirstOrDefault();
+            if (form != null)
+            {
+                form.Invoke(new Action(() => form.currentPlayerLabel.Text = $"Lượt của: {playerName}"));
+            }
+        }
+
         private void InitializeGameBoard()
         {
             currentCardPictureBox = new PictureBox
@@ -579,7 +583,7 @@ namespace UnoOnline {
                 Location = new Point(currentCardPictureBox.Right + 10, currentCardPictureBox.Bottom - 110)
             };
             Controls.Add(redButton);
-
+            redButton.Click += RedButton_Click;
             Button greenButton = new Button
             {
                 Size = new Size(50, 50),
@@ -588,7 +592,7 @@ namespace UnoOnline {
                 Location = new Point(currentCardPictureBox.Right + 70, currentCardPictureBox.Bottom - 110)
             };
             Controls.Add(greenButton);
-
+            greenButton.Click += GreenButton_Click;
             Button yellowButton = new Button
             {
                 FlatStyle = FlatStyle.Flat,
@@ -597,7 +601,7 @@ namespace UnoOnline {
                 Location = new Point(currentCardPictureBox.Right + 10, currentCardPictureBox.Bottom - 50)
             };
             Controls.Add(yellowButton);
-
+            yellowButton.Click += YellowButton_Click;
             Button blueButton = new Button
             {
                 FlatStyle = FlatStyle.Flat,
@@ -606,7 +610,7 @@ namespace UnoOnline {
                 Location = new Point(currentCardPictureBox.Right + 70, currentCardPictureBox.Bottom - 50)
             };
             Controls.Add(blueButton);
-
+            blueButton.Click += BlueButton_Click;
             // Initialize deck images
             InitializeDeckImages();
 
@@ -693,8 +697,27 @@ namespace UnoOnline {
             // Đối với các lá bài màu
             return Image.FromFile($"Resources/CardImages/{card.Color}_{card.Value}.png");
         }
-
-
+        private void RedButton_Click(object sender, EventArgs e)
+        {
+            currentCard.Color = "Red";
+            //Gửi thông điệp đến server theo định dạng DanhBai;ID;SoLuongBaiTrenTay;CardName;color
+            ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count - 1).ToString(), currentCard.CardName, currentCard.Color }));
+        }
+        private void GreenButton_Click(object sender, EventArgs e)
+        {
+            currentCard.Color = "Green";
+            ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count - 1).ToString(), currentCard.CardName, currentCard.Color }));
+        }
+        private void YellowButton_Click(object sender, EventArgs e)
+        {
+            currentCard.Color = "Yellow";
+            ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count - 1).ToString(), currentCard.CardName, currentCard.Color }));
+        }
+        private void BlueButton_Click(object sender, EventArgs e)
+        {
+            currentCard.Color = "Blue";
+            ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count - 1).ToString(), currentCard.CardName, currentCard.Color }));
+        }
         private void CardButton_Click(object sender, EventArgs e)
         {
             Button clickedButton = (Button)sender;
@@ -705,18 +728,19 @@ namespace UnoOnline {
                 //Gửi thông điệp đến server theo định dạng DanhBai;ID;SoLuongBaiTrenTay;CardName;color
                 if (selectedCard.Color == "Wild")
                 {
-                    //Hiển thị form chọn màu, bên dưới chỉ là giả sử
-                    //string color = Form1.ColorPicker();
+                    //Enable các nút chọn màu
+                    //Dưới đây chỉ để test, phần gửi thông điệp sẽ nằm trong sự kiện click của các nút màu
                     string color = "Red";
                     selectedCard.Color = color;
                 }
-                ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count - 1).ToString(), selectedCard.CardName, selectedCard.Color }));
+                else
+                {
+                    ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count - 1).ToString(), selectedCard.CardName, selectedCard.Color }));
+                }
                 GameManager.Instance.CurrentCard = selectedCard;
                 GameManager.Instance.Players[0].Hand.Remove(selectedCard);
-
                 // Update the current card PictureBox
                 UpdateCurrentCardDisplay(selectedCard);
-
                 // Remove the card from the player's hand
                 PlayerHandPanel.Controls.Remove(clickedButton);
                 DisableCardAndDrawButton();
@@ -873,11 +897,6 @@ namespace UnoOnline {
             Menu menu = new Menu();
             menu.Show();
         }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
         private void InitializeDeckImages()
         {
             // Load the image from the specified path
@@ -961,11 +980,11 @@ namespace UnoOnline {
             string message = chatInput.Text.Trim();
             if (!string.IsNullOrEmpty(message))
             {
+                ClientSocket.SendData(new Message(MessageType.Chat, new List<string> { Program.player.Name, message }));
                 AddChatMessage("You", message);
                 chatInput.Clear();
             }
         }
-
         // Helper classes
 
         // end aaasddd

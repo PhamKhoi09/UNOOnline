@@ -13,7 +13,7 @@ namespace UnoOnline
         public List<Player> Players { get; set; }
         public Card CurrentCard { get; set; }
         public int CurrentPlayerIndex { get; set; }
-        public bool IsOver { get; set; }
+        public bool IsSpecialDraw { get; set; }
         public static GameManager Instance
         {
             get
@@ -151,7 +151,10 @@ namespace UnoOnline
             {
                 // Message received: Update; ID; RemainingCards; CardName (if a card is played); color (if the card is a wild card)
                 string playerId = message.Data[0];
-                int remainingCards = int.Parse(message.Data[1]);
+                if (!int.TryParse(message.Data[1], out int remainingCards))
+                {
+                    throw new FormatException("Input string was not in a correct format.");
+                }
 
                 // Find the player in the list
                 Player player = Instance.Players.FirstOrDefault(p => p.Name == playerId);
@@ -171,6 +174,10 @@ namespace UnoOnline
                         }
                         Instance.CurrentCard.CardName = message.Data[2];
                         string[] card = message.Data[2].Split('_');
+                        if (card.Length < 2)
+                        {
+                            throw new ArgumentException($"Invalid card data: {message.Data[2]}");
+                        }
                         Instance.CurrentCard.Color = card[0];
                         Instance.CurrentCard.Value = card[1];
                     }
@@ -183,6 +190,10 @@ namespace UnoOnline
                         }
                         Instance.CurrentCard.CardName = message.Data[2];
                         string[] card = message.Data[2].Split('_');
+                        if (card.Length < 2)
+                        {
+                            throw new ArgumentException($"Invalid card data: {message.Data[2]}");
+                        }
                         Instance.CurrentCard.Value = card[1];
                         Instance.CurrentCard.Color = message.Data[3];
                     }
@@ -209,9 +220,21 @@ namespace UnoOnline
                     MessageBox.Show("Form1 is null.");
                 }
             }
+            catch (FormatException ex)
+            {
+                MessageBox.Show("Input string was not in a correct format: " + ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show("Invalid card data: " + ex.Message);
+            }
             catch (NullReferenceException ex)
             {
                 MessageBox.Show("Object not initialized: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Unexpected error: " + ex.Message);
             }
         }
 
@@ -221,26 +244,19 @@ namespace UnoOnline
             try
             {
                 string playerId = message.Data[0];
-                MessageBox.Show($"Handling Turn message for player: {playerId}");
-
+                Form1.UpdateCurrentPlayerLabel(playerId);
                 if (playerId == Program.player.Name)
                 {
                     MessageBox.Show("It's the current player's turn.");
 
-                    if (Instance.CurrentCard.CardName.Contains("Draw"))
+                    if (Instance.CurrentCard.CardName.Contains("Draw") ) //Bị rút bài
                     {
                         if (Instance.CurrentCard.CardName.Contains("Wild"))
-                        {
                             // Draw 4
                             ClientSocket.SendData(new Message(MessageType.SpecialCardEffect, new List<string> { Program.player.Name, (Instance.Players[0].Hand.Count + 4).ToString() }));
-                            //Thoát hàm
-
-                        }
                         else
-                        {
                             // Draw 2
                             ClientSocket.SendData(new Message(MessageType.SpecialCardEffect, new List<string> { Program.player.Name, (Instance.Players[0].Hand.Count + 2).ToString() }));
-                        }
                     }
                     else
                     {
@@ -268,27 +284,55 @@ namespace UnoOnline
         }
         public static void HandleSpecialDraw(Message message)
         {
-            //Specialdraws; ID; CardName; CardName...
+            //Specialdraws;anle;Yellow_Skip_;Green_Draw;Green_7;Red_3;
             string playerId = message.Data[0];
             Player player = Instance.Players.FirstOrDefault(p => p.Name == playerId);
-            for (int i = 1; i < message.Data.Count; i++)
+            string[] data = message.Data.ToArray();
+            List<string> cardNames = new List<string>(data.Skip(1));
+
+            try
             {
-                string cardName = message.Data[i];
-                string[] card = cardName.Split('_');
-                string color = card[0];
-                string value = card[1];
-                player.Hand.Add(new Card(cardName, color, value));
+                var cardsToAdd = cardNames.Select(cardData =>
+                {
+                    string[] card = cardData.Split('_');
+                    if (card.Length < 2)
+                    {
+                        throw new ArgumentException($"Invalid card data: {cardData}");
+                    }
+                    string color = card[0];
+                    string value = card[1];
+                    if (color == "Wild" && value != "Draw")
+                    {
+                        value = "Wild";
+                    }
+                    return new Card(cardData, color, value);
+                }).ToList();
+
+                player.Hand.AddRange(cardsToAdd);
+            }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show($"Error processing card data: {ex.Message}");
+                return;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Unexpected error: {ex.Message}");
+                return;
             }
 
-            //Hiển thị bài trên tay
-            Form1.ActiveForm.Invoke(new Action(() =>
+            Form1 form1 = Application.OpenForms.OfType<Form1>().FirstOrDefault();
+            if (form1 != null)
             {
-                Form1 form1 = (Form1)Application.OpenForms.OfType<Form1>().FirstOrDefault();
-                if (form1 != null)
+                form1.Invoke(new Action(() =>
                 {
                     form1.DisplayPlayerHand(player.Hand);
-                }
-            }));
+                }));
+            }
+            else
+            {
+                MessageBox.Show("Form1 is null.");
+            }
         }
         public static void HandleCardDraw(Message message)
         {
@@ -312,11 +356,22 @@ namespace UnoOnline
         {
             string playerName = message.Data[0];
             string chatMessage = message.Data[1];
-            //Hiển thị lên form1
-            // VD vầy Form1.DisplayChatMessage(playerName, chatMessage);
+            //Hiển thị lên form1 AddChatMessage
+            Form1 form1 = Application.OpenForms.OfType<Form1>().FirstOrDefault();
+            if (form1 != null)
+            {
+                form1.Invoke(new Action(() =>
+                {
+                    form1.AddChatMessage(playerName, chatMessage);
+                }));
+            }
+            else
+            {
+                MessageBox.Show("Form1 is null.");
+            }
         }
 
-        public static void HandleEndMessage(Message message)
+            public static void HandleEndMessage(Message message)
         {
             string[] data = message.Data.ToArray();
             string winnerName = data[0];

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Serialization;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -119,6 +120,7 @@ namespace UnoOnline
                         GameManager.HandleCardDraw(message);
                         break;
                     case MessageType.Specialdraws:
+                        OnMessageReceived?.Invoke(string.Join(" ", message.Data));
                         GameManager.HandleSpecialDraw(message);
                         break;
                     case MessageType.MESSAGE:
@@ -136,6 +138,9 @@ namespace UnoOnline
                     case MessageType.Result:
                         GameManager.HandleResult(message);
                         break;
+                    case MessageType.NotEnoughPlayers:
+                        // Handle not enough players
+                        break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -152,6 +157,7 @@ namespace UnoOnline
                 }
             }
         }
+
 
 
         public static void SendData(Message message)
@@ -256,6 +262,7 @@ public enum MessageType
     YellUNOEnable,
     ReStart,
     Finish,
+    NotEnoughPlayers,
 }
 public class Message
 {
@@ -280,20 +287,21 @@ public class Message
 
     public static Message FromString(string messageString)
     {
-        var parts = messageString.Split(new[] { ';' }, 2);
-        var type = (MessageType)Enum.Parse(typeof(MessageType), parts[0]);
-        var data = new List<string>();
-
-        // Handle the case where the data contains underscores
-        if (parts.Length > 1)
+        try
         {
-            var dataParts = parts[1].Split(';');
-            foreach (var part in dataParts)
+            var parts = messageString.Split(new[] { ';' }, 2);
+            if (parts.Length < 2)
             {
-                data.Add(part);
+                throw new FormatException("Invalid message format");
             }
-        }
 
-        return new Message(type, data);
+            var type = (MessageType)Enum.Parse(typeof(MessageType), parts[0]);
+            var data = parts[1].Split(';').ToList();
+            return new Message(type, data);
+        }
+        catch (Exception ex)
+        {
+            throw new FormatException("Invalid message format", ex);
+        }
     }
 }

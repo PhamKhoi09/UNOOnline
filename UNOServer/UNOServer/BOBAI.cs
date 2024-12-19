@@ -23,4 +23,9 @@ namespace UNOServer
                 "Blue_Draw", "Blue_Draw_", "Red_Draw", "Red_Draw_", "Yellow_Draw", "Yellow_Draw_", "Green_Draw", "Green_Draw_"
         }; //Mảng string chứa tên các lá bài trong bộ bài
     }
+    /* Class để lưu trữ các bài đã mở ra (đã đánh) */
+    internal class MoBai
+    {
+        public static List<string> mobai = new List<string>();
+    }
 }
