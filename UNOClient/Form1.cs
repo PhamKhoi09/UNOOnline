@@ -30,7 +30,10 @@ namespace UnoOnline
         private Panel actionPanel;
         Card currentCard = GameManager.Instance.CurrentCard;
 
-
+        private Button redButton;
+        private Button greenButton;
+        private Button yellowButton;
+        private Button blueButton;
 
         // Update the image displayed in the PictureBox
         public void UpdateCurrentCardDisplay(Card currentCard)
@@ -40,9 +43,6 @@ namespace UnoOnline
                 MessageBox.Show("CurrentCard is null in UpdateCurrentCardDisplay.");
                 return;
             }
-
-            MessageBox.Show($"UpdateCurrentCardDisplay called with: {currentCard.CardName}, {currentCard.Color}, {currentCard.Value}");
-
             string cardImagePath = "";
             if (currentCard.CardName.Contains("Wild"))
             {
@@ -61,7 +61,6 @@ namespace UnoOnline
             {
                 // Load the image into the PictureBox
                 currentCardPictureBox.Image = Image.FromFile(cardImagePath);
-                MessageBox.Show($"Card image updated: {cardImagePath}");
             }
         }
         private void InitializeAdditionalComponents()
@@ -123,7 +122,6 @@ namespace UnoOnline
                 BeginInvoke(new Action(() => AddChatMessage(sender, message)));
                 return;
             }
-            ClientSocket.SendData(new Message(MessageType.Chat, new List<string> { Program.player.Name, message }));
             string formattedMessage = $"[{sender}]: {message}\n";
             chatHistory.AppendText(formattedMessage);
             chatHistory.ScrollToCaret();
@@ -491,7 +489,6 @@ namespace UnoOnline
         public Form1()
         {
             InitializeComponent();
-            InitializeGame();
             InitializeGameBoard();
             InitializeTimer();
             ApplyCustomTheme();
@@ -511,10 +508,15 @@ namespace UnoOnline
             this.StartPosition = FormStartPosition.CenterScreen; // Hiển thị Form ở giữa màn hình
         }
 
-        // Inside the Form1 class
-        private void InitializeGame()
+        public static void UpdateCurrentPlayerLabel(string playerName)
         {
+            Form1 form = Application.OpenForms.OfType<Form1>().FirstOrDefault();
+            if (form != null)
+            {
+                form.Invoke(new Action(() => form.currentPlayerLabel.Text = $"Lượt của: {playerName}"));
+            }
         }
+
         private void InitializeGameBoard()
         {
             // Label for client info
@@ -531,11 +533,10 @@ namespace UnoOnline
             // PictureBox for current card
             currentCardPictureBox = new PictureBox
             {
-                Size = new Size(this.ClientSize.Width / 6, this.ClientSize.Height / 3), // Proportionate size
-                SizeMode = PictureBoxSizeMode.Zoom, // Ensure the image fits correctly
-                BackColor = Color.Transparent,  // Optional: Background color
-                Location = new Point((this.ClientSize.Width - this.ClientSize.Width / 6) / 2, // Center horizontally
-                                     (this.ClientSize.Height - this.ClientSize.Height / 3) / 2 - 35), // Center vertically
+                Size = new Size(this.ClientSize.Width / 6, this.ClientSize.Height / 3),
+                SizeMode = PictureBoxSizeMode.Zoom,
+                BackColor = Color.Transparent,
+                Location = new Point((this.ClientSize.Width - this.ClientSize.Width / 6) / 2, (this.ClientSize.Height - this.ClientSize.Height / 3) / 2 - 35),
                 BorderStyle = BorderStyle.FixedSingle,
             };
             Controls.Add(currentCardPictureBox);
@@ -546,8 +547,8 @@ namespace UnoOnline
                 Size = new Size(200, 30),
                 Text = $"Lượt của: {GameManager.Instance.Players[0].Name}",
                 Font = new Font("Arial", 14),
-                BackColor = Color.Transparent,  // Optional: Background color
-                Location = new Point(currentCardPictureBox.Left + (currentCardPictureBox.Width - 200) / 2, currentCardPictureBox.Top - 40) // Centered above the PictureBox
+                BackColor = Color.Transparent,
+                Location = new Point(currentCardPictureBox.Left + (currentCardPictureBox.Width - 200) / 2, currentCardPictureBox.Top - 40)
             };
             Controls.Add(currentPlayerLabel);
 
@@ -555,7 +556,7 @@ namespace UnoOnline
             PlayerHandPanel = new FlowLayoutPanel
             {
                 Dock = DockStyle.Bottom,
-                Height = 200, // Increased height
+                Height = 200,
                 AutoScroll = true,
                 WrapContents = false,
                 FlowDirection = FlowDirection.LeftToRight,
@@ -568,7 +569,7 @@ namespace UnoOnline
             {
                 Size = new Size(100, 40),
                 Text = "Rút bài",
-                Location = new Point(this.ClientSize.Width - 120, (this.ClientSize.Height - 200) / 2 + 50), // Align with currentCardPictureBox and right edge
+                Location = new Point(this.ClientSize.Width - 120, (this.ClientSize.Height - 200) / 2 + 50),
                 BackColor = Color.Empty
             };
             drawCardButton.Click += DrawCardButton_Click;
@@ -578,13 +579,13 @@ namespace UnoOnline
             {
                 Size = new Size(100, 40),
                 Text = "UNO!",
-                Location = new Point(this.ClientSize.Width - 120, (this.ClientSize.Height - 200) / 2 + 100) // Align with currentCardPictureBox and right edge
+                Location = new Point(this.ClientSize.Width - 120, (this.ClientSize.Height - 200) / 2 + 100)
             };
             yellUNOButton.Click += yellUNOButton_Click;
             Controls.Add(yellUNOButton);
 
-            // Color buttons
-            Button redButton = new Button
+            // Initialize color buttons
+            redButton = new Button
             {
                 Size = new Size(50, 50),
                 BackColor = Color.Red,
@@ -592,8 +593,9 @@ namespace UnoOnline
                 Location = new Point(currentCardPictureBox.Right + 10, currentCardPictureBox.Bottom - 110)
             };
             Controls.Add(redButton);
+            redButton.Click += RedButton_Click;
 
-            Button greenButton = new Button
+            greenButton = new Button
             {
                 Size = new Size(50, 50),
                 BackColor = Color.Green,
@@ -601,8 +603,9 @@ namespace UnoOnline
                 Location = new Point(currentCardPictureBox.Right + 70, currentCardPictureBox.Bottom - 110)
             };
             Controls.Add(greenButton);
+            greenButton.Click += GreenButton_Click;
 
-            Button yellowButton = new Button
+            yellowButton = new Button
             {
                 FlatStyle = FlatStyle.Flat,
                 Size = new Size(50, 50),
@@ -610,8 +613,9 @@ namespace UnoOnline
                 Location = new Point(currentCardPictureBox.Right + 10, currentCardPictureBox.Bottom - 50)
             };
             Controls.Add(yellowButton);
+            yellowButton.Click += YellowButton_Click;
 
-            Button blueButton = new Button
+            blueButton = new Button
             {
                 FlatStyle = FlatStyle.Flat,
                 Size = new Size(50, 50),
@@ -619,7 +623,7 @@ namespace UnoOnline
                 Location = new Point(currentCardPictureBox.Right + 70, currentCardPictureBox.Bottom - 50)
             };
             Controls.Add(blueButton);
-
+            blueButton.Click += BlueButton_Click;
             // Initialize deck images
             InitializeDeckImages();
 
@@ -632,11 +636,7 @@ namespace UnoOnline
             Message yellUNOMessage = new Message(MessageType.YellUNO, new List<string> { Program.player.Name });
             ClientSocket.SendData(yellUNOMessage);
             //Disable uno button
-            Form1 form = Application.OpenForms.OfType<Form1>().FirstOrDefault();
-            if (form != null)
-            {
-                form.Invoke(new Action(() => form.yellUNOButton.Enabled = false));
-            }
+            yellUNOButton.Enabled = false;
 
         }
 
@@ -706,8 +706,45 @@ namespace UnoOnline
             // Đối với các lá bài màu
             return Image.FromFile($"Resources/CardImages/{card.Color}_{card.Value}.png");
         }
-
-
+        private void EnableColorButtons()
+        {
+            redButton.Enabled = true;
+            greenButton.Enabled = true;
+            yellowButton.Enabled = true;
+            blueButton.Enabled = true;
+        }
+        private void DisableColorButtons()
+        {
+            redButton.Enabled = false;
+            greenButton.Enabled = false;
+            yellowButton.Enabled = false;
+            blueButton.Enabled = false;
+        }
+        private void RedButton_Click(object sender, EventArgs e)
+        {
+            GameManager.Instance.CurrentCard.Color = "Red";
+            //Gửi thông điệp đến server theo định dạng DanhBai;ID;SoLuongBaiTrenTay;CardName;color
+            ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count).ToString(), GameManager.Instance.CurrentCard.CardName, GameManager.Instance.CurrentCard.Color }));
+            DisableColorButtons();
+        }
+        private void GreenButton_Click(object sender, EventArgs e)
+        {
+            GameManager.Instance.CurrentCard.Color = "Green";
+            ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count ).ToString(), GameManager.Instance.CurrentCard.CardName, GameManager.Instance.CurrentCard.Color }));
+            DisableCardAndDrawButton();
+        }
+        private void YellowButton_Click(object sender, EventArgs e)
+        {
+            GameManager.Instance.CurrentCard.Color = "Yellow";
+            ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count ).ToString(), GameManager.Instance.CurrentCard.CardName, GameManager.Instance.CurrentCard.Color }));
+            DisableCardAndDrawButton();
+        }
+        private void BlueButton_Click(object sender, EventArgs e)
+        {
+            GameManager.Instance.CurrentCard.Color = "Blue";
+            ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count).ToString(), GameManager.Instance.CurrentCard.CardName, GameManager.Instance.CurrentCard.Color }));
+            DisableCardAndDrawButton();
+        }
         private void CardButton_Click(object sender, EventArgs e)
         {
             Button clickedButton = (Button)sender;
@@ -736,10 +773,8 @@ namespace UnoOnline
                 ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count - 1).ToString(), selectedCard.CardName, selectedCard.Color }));
                 GameManager.Instance.CurrentCard = selectedCard;
                 GameManager.Instance.Players[0].Hand.Remove(selectedCard);
-
                 // Update the current card PictureBox
                 UpdateCurrentCardDisplay(selectedCard);
-
                 // Remove the card from the player's hand
                 PlayerHandPanel.Controls.Remove(clickedButton);
                 // Update clientInfoLabel
@@ -753,20 +788,6 @@ namespace UnoOnline
                 MessageBox.Show("Invalid move.");
             }
         }
-
-        private Color GetCardColor(Card card)
-        {
-            // Định nghĩa màu sắc cho mỗi lá bài
-            switch (card.Color)
-            {
-                case "Red": return Color.Red;
-                case "Blue": return Color.Blue;
-                case "Green": return Color.Green;
-                case "Yellow": return Color.Yellow;
-                default: return Color.Gray;
-            }
-        }
-
         private void DrawCardButton_Click(object sender, EventArgs e)
         {
             ClientSocket.SendData(new Message(MessageType.RutBai, new List<string> { Program.player.Name, ((GameManager.Instance.Players[0].Hand.Count) + 1).ToString() }));
@@ -1047,11 +1068,11 @@ namespace UnoOnline
             string message = chatInput.Text.Trim();
             if (!string.IsNullOrEmpty(message))
             {
+                ClientSocket.SendData(new Message(MessageType.Chat, new List<string> { Program.player.Name, message }));
                 AddChatMessage("You", message);
                 chatInput.Clear();
             }
         }
-
         // Helper classes
 
         // end aaasddd

@@ -13,7 +13,7 @@ namespace UnoOnline
         public List<Player> Players { get; set; }
         public Card CurrentCard { get; set; }
         public int CurrentPlayerIndex { get; set; }
-        public bool IsOver { get; set; }
+        public bool IsSpecialDraw { get; set; }
         public static GameManager Instance
         {
             get
@@ -36,6 +36,7 @@ namespace UnoOnline
             Players = new List<Player>();
             CurrentCard = new Card();
             CurrentPlayerIndex = 0;
+            IsSpecialDraw = false;
         }
 
         public void UpdateOtherPlayerName(string otherPlayerName)

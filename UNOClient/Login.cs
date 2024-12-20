@@ -27,7 +27,7 @@ namespace UnoOnline
             }
 
             // Chuỗi kết nối từ App.config
-            string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=E:\UNOOnline\UNOClient\Database1.mdf;Integrated Security=True;";
+            string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\ledan\source\repos\UNOOnline\UNOClient\Database1.mdf;Integrated Security=True;";
 
             try
             {
