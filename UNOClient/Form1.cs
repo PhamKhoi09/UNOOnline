@@ -516,6 +516,18 @@ namespace UnoOnline {
         }
         private void InitializeGameBoard()
         {
+            // Label for client info
+            clientInfoLabel = new Label
+            {
+                Size = new Size(200, 30),
+                Text = $"{Program.player.Name}: {GameManager.Instance.Players[0].Hand.Count}",
+                Font = new Font("Arial", 14),
+                BackColor = Color.Transparent,
+                Location = new Point(10, 10) // Góc trên bên trái
+            };
+            Controls.Add(clientInfoLabel);
+
+            // PictureBox for current card
             currentCardPictureBox = new PictureBox
             {
                 Size = new Size(this.ClientSize.Width / 6, this.ClientSize.Height / 3), // Proportionate size
@@ -702,13 +714,22 @@ namespace UnoOnline {
 
             if (GameManager.Instance.IsValidMove(selectedCard))
             {
-                //Gửi thông điệp đến server theo định dạng DanhBai;ID;SoLuongBaiTrenTay;CardName;color
+                // Gửi thông điệp đến server theo định dạng DanhBai;ID;SoLuongBaiTrenTay;CardName;color
                 if (selectedCard.Color == "Wild")
                 {
+<<<<<<< Updated upstream
                     //Hiển thị form chọn màu, bên dưới chỉ là giả sử
                     //string color = Form1.ColorPicker();
                     string color = "Red";
                     selectedCard.Color = color;
+=======
+                    // Enable các nút chọn màu
+                    EnableColorButtons();
+                }
+                else
+                {
+                    ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count - 1).ToString(), selectedCard.CardName, selectedCard.Color }));
+>>>>>>> Stashed changes
                 }
                 ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count - 1).ToString(), selectedCard.CardName, selectedCard.Color }));
                 GameManager.Instance.CurrentCard = selectedCard;
@@ -719,6 +740,8 @@ namespace UnoOnline {
 
                 // Remove the card from the player's hand
                 PlayerHandPanel.Controls.Remove(clickedButton);
+                // Update clientInfoLabel
+                clientInfoLabel.Text = $"{Program.player.Name}: {GameManager.Instance.Players[0].Hand.Count}";
                 DisableCardAndDrawButton();
             }
             else
@@ -745,6 +768,8 @@ namespace UnoOnline {
             ClientSocket.SendData(new Message(MessageType.RutBai, new List<string> { Program.player.Name, ((GameManager.Instance.Players[0].Hand.Count) + 1).ToString() }));
             // Cập nhật giao diện
             DisplayPlayerHand(GameManager.Instance.Players[0].Hand);
+            // Update clientInfoLabel
+            clientInfoLabel.Text = $"{Program.player.Name}: {GameManager.Instance.Players[0].Hand.Count}";
             DisableCardAndDrawButton();
         }
 
@@ -785,6 +810,7 @@ namespace UnoOnline {
 
         private PictureBox currentCardPictureBox;
         private Label currentPlayerLabel;
+        private Label clientInfoLabel; // Nhãn để hiển thị tên và số bài của client
         private async void AnimateCardDrawing(Card card)
         {
             Button cardButton = new Button
@@ -873,45 +899,66 @@ namespace UnoOnline {
             Menu menu = new Menu();
             menu.Show();
         }
+<<<<<<< Updated upstream
 
         private void Form1_Load(object sender, EventArgs e)
         {
 
         }
         private void InitializeDeckImages()
+=======
+        public void InitializeDeckImages()
+>>>>>>> Stashed changes
         {
-            // Load the image from the specified path
-            Image deckImage = Image.FromFile(@"Resources\CardImages\Deck.png");
+           // Clear existing deck images and labels
+    var existingDeckImages = Controls.OfType<PictureBox>().Where(pb => pb.Tag != null && pb.Tag.ToString() == "DeckImage").ToList();
+    var existingDeckLabels = Controls.OfType<Label>().Where(lbl => lbl.Tag != null && lbl.Tag.ToString() == "DeckLabel").ToList();
+    foreach (var deckImages in existingDeckImages)
+    {
+        Controls.Remove(deckImages);
+    }
+    foreach (var deckLabel in existingDeckLabels)
+    {
+        Controls.Remove(deckLabel);
+    }
 
-            // Create and configure the PictureBox controls
-            for (int i = 0; i < 3; i++)
-            {
-                PictureBox deckPictureBox = new PictureBox
-                {
-                    Size = new Size(100, 150), // Set the size of the PictureBox
-                    Image = deckImage, // Set the image
-                    SizeMode = PictureBoxSizeMode.StretchImage, // Ensure the image fits correctly
-                    Location = new Point(this.ClientSize.Width - (120 + i * 110), 20), // Position them horizontally with spacing on the top-right side
-                    Anchor = AnchorStyles.Top | AnchorStyles.Right, // Anchor to the top-right corner
-                    BorderStyle = BorderStyle.FixedSingle // Optional: Add a border for better visibility
-                };
+    // Load the image from the specified path
+    Image deckImage = Image.FromFile(@"Resources\CardImages\Deck.png");
 
-                // Create and configure the Label controls
-                Label deckLabel = new Label
-                {
-                    Size = new Size(100, 20), // Set the size of the Label
-                    Text = $"Người chơi {i + 1}", // Set the text of the Label
-                    TextAlign = ContentAlignment.MiddleCenter, // Center the text
-                    Location = new Point(deckPictureBox.Left, deckPictureBox.Bottom + 5), // Position below the PictureBox
-                    Anchor = AnchorStyles.Top | AnchorStyles.Right, // Anchor to the top-right corner
-                    BackColor = Color.White, // Optional: Set the background color
-                };
+    // Create and configure the PictureBox controls
+    for (int i = 1; i < GameManager.Instance.Players.Count; i++) // Start from 1 to skip the current player
+    {
+        var player = GameManager.Instance.Players[i];
+        PictureBox deckPictureBox = new PictureBox
+        {
+            Size = new Size(100, 150), // Set the size of the PictureBox
+            Image = deckImage, // Set the image
+            SizeMode = PictureBoxSizeMode.StretchImage, // Ensure the image fits correctly
+            Location = new Point(this.ClientSize.Width - (120 + (i - 1) * 110), 20), // Position them horizontally with spacing on the top-right side
+            Anchor = AnchorStyles.Top | AnchorStyles.Right, // Anchor to the top-right corner
+            BorderStyle = BorderStyle.FixedSingle, // Optional: Add a border for better visibility
+            Tag = "DeckImage" // Tag to identify deck images
+        };
 
-                // Add the PictureBox and Label to the form's controls
-                Controls.Add(deckPictureBox);
-                Controls.Add(deckLabel);
-            }
-        }
+        // Create and configure the Label controls
+        Label deckLabel = new Label
+        {
+            Size = new Size(100, 20), // Set the size of the Label
+            Text = $"{player.Name}: {player.HandCount} cards", // Set the text of the Label
+            TextAlign = ContentAlignment.MiddleCenter, // Center the text
+            Location = new Point(deckPictureBox.Left, deckPictureBox.Bottom + 5), // Position below the PictureBox
+            Anchor = AnchorStyles.Top | AnchorStyles.Right, // Anchor to the top-right corner
+            BackColor = Color.Transparent, // Optional: Set the background color
+            Tag = "DeckLabel" // Tag to identify deck labels
+        };
+
+        // Add the PictureBox and Label to the form's controls
+        Controls.Add(deckPictureBox);
+        Controls.Add(deckLabel);
+    }
+
+ }
+
 
         private void InitializeChatPanel()
         {

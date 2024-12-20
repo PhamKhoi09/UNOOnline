@@ -95,3 +95,6 @@ TestResult-*.
 *.tmp_proj.user
 UNOClient/Database1.mdf
 UNOClient/Database1_log.ldf
+UNOClient/GetPassword.cs
+UNOClient/Login.cs
+UNOClient/Register.cs

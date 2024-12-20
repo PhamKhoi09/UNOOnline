@@ -31,7 +31,6 @@ namespace UnoOnline
                 return instance;
             }
         }
-
         private GameManager()
         {
             Players = new List<Player>();
@@ -86,7 +85,7 @@ namespace UnoOnline
                 string[] card = cardData.Split('_');
                 string color = card[0];
                 string value = card[1];
-                if (color =="Wild" && value != "Draw")
+                if (color == "Wild" && value != "Draw")
                 {
                     value = "Wild";
                 }
@@ -108,15 +107,26 @@ namespace UnoOnline
             int turnOrder = int.Parse(data[1]);
             int cardCount = int.Parse(data[2]);
 
-            Player player = new Player(playerName);
-            player.HandCount = cardCount;
+            Player player = Instance.Players.FirstOrDefault(p => p.Name == playerName);
+            if (player == null)
+            {
+                player = new Player(playerName);
+                Instance.Players.Add(player);
+            }
+            player.Hand = new List<Card>(new Card[cardCount]); // Update the Hand property to reflect the correct number of cards
 
-            Instance.AddPlayer(player);
+            Form1 form = Application.OpenForms.OfType<Form1>().FirstOrDefault();
+            if (form != null)
+            {
+                form.Invoke(new Action(() => form.InitializeDeckImages()));
+            }
         }
+
         public void AddPlayer(Player player)
         {
             Instance.Players.Add(player);
         }
+
         public static void Boot()
         {
             //Mở màn hình game mở (nếu chưa)
@@ -136,10 +146,13 @@ namespace UnoOnline
             }
         }
 
+<<<<<<< Updated upstream
         public void PlayCard(Player player, Card card)
         {
         }
 
+=======
+>>>>>>> Stashed changes
         public bool IsValidMove(Card card)
         {
             return card.Color == Instance.CurrentCard.Color || card.Value == Instance.CurrentCard.Value || card.Color == "Wild" || (Instance.CurrentCard.CardName.Contains("Wild") && card.CardName.Contains("Wild"));
@@ -157,7 +170,7 @@ namespace UnoOnline
                 Player player = Instance.Players.FirstOrDefault(p => p.Name == playerId);
                 if (player != null)
                 {
-                    player.HandCount = remainingCards;
+                    player.Hand = new List<Card>(new Card[remainingCards]); // Update the Hand property to reflect the correct number of cards
                 }
 
                 if (playerId != Program.player.Name)
@@ -202,6 +215,7 @@ namespace UnoOnline
                         {
                             MessageBox.Show("CurrentCard is null.");
                         }
+                        form1.InitializeDeckImages(); // Refresh the deck images and labels
                     }));
                 }
                 else
@@ -215,7 +229,10 @@ namespace UnoOnline
             }
         }
 
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
         public static void HandleTurnMessage(Message message)
         {
             try
@@ -227,7 +244,11 @@ namespace UnoOnline
                 {
                     MessageBox.Show("It's the current player's turn.");
 
+<<<<<<< Updated upstream
                     if (Instance.CurrentCard.CardName.Contains("Draw"))
+=======
+                    if (Instance.CurrentCard.CardName.Contains("Draw") && Instance.IsSpecialDraw == true) //Bị rút bài
+>>>>>>> Stashed changes
                     {
                         if (Instance.CurrentCard.CardName.Contains("Wild"))
                         {
@@ -286,10 +307,19 @@ namespace UnoOnline
                 Form1 form1 = (Form1)Application.OpenForms.OfType<Form1>().FirstOrDefault();
                 if (form1 != null)
                 {
+<<<<<<< Updated upstream
                     form1.DisplayPlayerHand(player.Hand);
+=======
+                    form1.Invoke(new Action(() =>
+                    {
+                        form1.DisplayPlayerHand(Instance.Players[0].Hand);
+                        form1.InitializeDeckImages(); // Refresh the deck images and labels
+                    }));
+>>>>>>> Stashed changes
                 }
             }));
         }
+
         public static void HandleCardDraw(Message message)
         {
             string playerName = message.Data[0];
@@ -298,16 +328,24 @@ namespace UnoOnline
             string color = card[0];
             string value = card[1];
             Instance.Players[0].Hand.Add(new Card(cardName, color, value));
+
+            Form1 form = Application.OpenForms.OfType<Form1>().FirstOrDefault();
+            if (form != null)
+            {
+                form.Invoke(new Action(() => form.InitializeDeckImages())); // Refresh the deck images and labels
+            }
         }
+
         public static void Penalty(Message message)
         {
             string playerGotPenalty = message.Data[0];
             if (playerGotPenalty == Program.player.Name)
             {
                 MessageBox.Show("You got penalty for not pressing the UNO button!");
-                ClientSocket.SendData(new Message(MessageType.DrawPenalty, new List<string> { Program.player.Name}));
+                ClientSocket.SendData(new Message(MessageType.DrawPenalty, new List<string> { Program.player.Name }));
             }
         }
+
         public static void HandleChatMessage(Message message)
         {
             string playerName = message.Data[0];
@@ -357,6 +395,21 @@ namespace UnoOnline
             {
                 ClientSocket.gamemanager.Players.Remove(disconnectingPlayer);
             }
+        }
+    }
+    public class Player
+    {
+        public string Name { get; set; }
+        public List<Card> Hand { get; set; }
+        public int HandCount => Hand.Count; // Update this property to reflect the actual number of cards in the hand
+        public bool IsTurn { get; set; }
+        public int Points { get; set; }
+        public int Rank { get; set; }
+
+        public Player(string name)
+        {
+            Name = name;
+            Hand = new List<Card>();
         }
     }
 }
