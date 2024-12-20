@@ -636,9 +636,8 @@ namespace UnoOnline
         {
             Message yellUNOMessage = new Message(MessageType.YellUNO, new List<string> { Program.player.Name });
             ClientSocket.SendData(yellUNOMessage);
-            //Disable uno button
+            // Disable uno button
             yellUNOButton.Enabled = false;
-
         }
 
 
