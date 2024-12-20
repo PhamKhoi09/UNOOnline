@@ -420,7 +420,25 @@ namespace UnoOnline
                 MessageBox.Show("Form1 is null.");
             }
         }
-
+        public void HandleNotEnoughPlayer(Message message)
+        {
+            //Hiển thị thông báo không đủ người chơi nếu form1 chưa bật
+            //Hiển thị thông báo kết thúc game vì có người chơi thoát đột ngột ( và số người chơi còn lại ít hơn 2)
+            if(!Program.IsFormOpen(typeof(Form1)))
+            {
+                Application.OpenForms[0].Invoke(new Action(() =>
+                {
+                    MessageBox.Show("Not enough players to start the game.");
+                }));
+            }
+            else
+            {
+                Application.OpenForms[0].Invoke(new Action(() =>
+                {
+                    MessageBox.Show("Game ended because a player left the game.");
+                }));
+            }
+        }
         public static void HandleEndMessage(Message message)
         {
             string[] data = message.Data.ToArray();

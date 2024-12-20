@@ -138,6 +138,7 @@ namespace UnoOnline
                         break;
                     case MessageType.NotEnoughPlayers:
                         // Handle not enough players
+                        GameManager.HandleNotEnoughPlayers();
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
