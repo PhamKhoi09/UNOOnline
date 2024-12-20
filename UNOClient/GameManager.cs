@@ -443,6 +443,19 @@ namespace UnoOnline
                     loseResult.Show();
                 }));
             }
+            
+            //Clear players hand
+            Instance.Players[0].Hand.Clear();
+
+            //Close Form1
+            Form1 form1 = Application.OpenForms.OfType<Form1>().FirstOrDefault();
+            if (form1 != null)
+            {
+                form1.Invoke(new Action(() =>
+                {
+                    form1.Close();
+                }));
+            }
         }
 
         public static void HandleResult(Message message)
