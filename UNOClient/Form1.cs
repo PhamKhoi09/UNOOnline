@@ -715,6 +715,7 @@ namespace UnoOnline {
             if (GameManager.Instance.IsValidMove(selectedCard))
             {
                 // Gửi thông điệp đến server theo định dạng DanhBai;ID;SoLuongBaiTrenTay;CardName;color
+                // Gửi thông điệp đến server theo định dạng DanhBai;ID;SoLuongBaiTrenTay;CardName;color
                 if (selectedCard.Color == "Wild")
                 {
 <<<<<<< Updated upstream
@@ -740,6 +741,8 @@ namespace UnoOnline {
 
                 // Remove the card from the player's hand
                 PlayerHandPanel.Controls.Remove(clickedButton);
+                // Update clientInfoLabel
+                clientInfoLabel.Text = $"{Program.player.Name}: {GameManager.Instance.Players[0].Hand.Count}";
                 // Update clientInfoLabel
                 clientInfoLabel.Text = $"{Program.player.Name}: {GameManager.Instance.Players[0].Hand.Count}";
                 DisableCardAndDrawButton();
@@ -768,6 +771,8 @@ namespace UnoOnline {
             ClientSocket.SendData(new Message(MessageType.RutBai, new List<string> { Program.player.Name, ((GameManager.Instance.Players[0].Hand.Count) + 1).ToString() }));
             // Cập nhật giao diện
             DisplayPlayerHand(GameManager.Instance.Players[0].Hand);
+            // Update clientInfoLabel
+            clientInfoLabel.Text = $"{Program.player.Name}: {GameManager.Instance.Players[0].Hand.Count}";
             // Update clientInfoLabel
             clientInfoLabel.Text = $"{Program.player.Name}: {GameManager.Instance.Players[0].Hand.Count}";
             DisableCardAndDrawButton();
@@ -810,6 +815,7 @@ namespace UnoOnline {
 
         private PictureBox currentCardPictureBox;
         private Label currentPlayerLabel;
+        private Label clientInfoLabel; // Nhãn để hiển thị tên và số bài của client
         private Label clientInfoLabel; // Nhãn để hiển thị tên và số bài của client
         private async void AnimateCardDrawing(Card card)
         {
@@ -939,6 +945,20 @@ namespace UnoOnline {
             BorderStyle = BorderStyle.FixedSingle, // Optional: Add a border for better visibility
             Tag = "DeckImage" // Tag to identify deck images
         };
+    // Create and configure the PictureBox controls
+    for (int i = 1; i < GameManager.Instance.Players.Count; i++) // Start from 1 to skip the current player
+    {
+        var player = GameManager.Instance.Players[i];
+        PictureBox deckPictureBox = new PictureBox
+        {
+            Size = new Size(100, 150), // Set the size of the PictureBox
+            Image = deckImage, // Set the image
+            SizeMode = PictureBoxSizeMode.StretchImage, // Ensure the image fits correctly
+            Location = new Point(this.ClientSize.Width - (120 + (i - 1) * 110), 20), // Position them horizontally with spacing on the top-right side
+            Anchor = AnchorStyles.Top | AnchorStyles.Right, // Anchor to the top-right corner
+            BorderStyle = BorderStyle.FixedSingle, // Optional: Add a border for better visibility
+            Tag = "DeckImage" // Tag to identify deck images
+        };
 
         // Create and configure the Label controls
         Label deckLabel = new Label
@@ -951,6 +971,24 @@ namespace UnoOnline {
             BackColor = Color.Transparent, // Optional: Set the background color
             Tag = "DeckLabel" // Tag to identify deck labels
         };
+        // Create and configure the Label controls
+        Label deckLabel = new Label
+        {
+            Size = new Size(100, 20), // Set the size of the Label
+            Text = $"{player.Name}: {player.HandCount} cards", // Set the text of the Label
+            TextAlign = ContentAlignment.MiddleCenter, // Center the text
+            Location = new Point(deckPictureBox.Left, deckPictureBox.Bottom + 5), // Position below the PictureBox
+            Anchor = AnchorStyles.Top | AnchorStyles.Right, // Anchor to the top-right corner
+            BackColor = Color.Transparent, // Optional: Set the background color
+            Tag = "DeckLabel" // Tag to identify deck labels
+        };
+
+        // Add the PictureBox and Label to the form's controls
+        Controls.Add(deckPictureBox);
+        Controls.Add(deckLabel);
+    }
+
+ }
 
         // Add the PictureBox and Label to the form's controls
         Controls.Add(deckPictureBox);
