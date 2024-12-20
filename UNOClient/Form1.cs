@@ -524,7 +524,7 @@ namespace UnoOnline
             clientInfoLabel = new Label
             {
                 Size = new Size(200, 30),
-                Text = $"Tên: {Program.player.Name}, Số bài: {GameManager.Instance.Players[0].Hand.Count}",
+                Text = $"Tên: {Program.player.Name}",
                 Font = new Font("Arial", 14),
                 BackColor = Color.Transparent,
                 Location = new Point(10, 10) // Góc trên bên trái
@@ -762,7 +762,6 @@ namespace UnoOnline
                 GameManager.Instance.Players[0].Hand.Remove(selectedCard);
                 UpdateCurrentCardDisplay(selectedCard);
                 PlayerHandPanel.Controls.Remove(clickedButton);
-                clientInfoLabel.Text = $"{Program.player.Name}: {GameManager.Instance.Players[0].Hand.Count}";
                 DisableCardAndDrawButton();
             }
             else
@@ -801,7 +800,6 @@ namespace UnoOnline
             // Cập nhật giao diện
             DisplayPlayerHand(GameManager.Instance.Players[0].Hand);
             DisableCardAndDrawButton();
-            clientInfoLabel.Text = $"{Program.player.Name}: {GameManager.Instance.Players[0].Hand.Count}";
         }
 
         public void EnableCardAndDrawButton()
@@ -913,22 +911,12 @@ namespace UnoOnline
             // Initialize other custom components if needed
         }
 
-        private void customCardPanel1_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
         public class CustomCardPanel : Panel
         {
             public CustomCardPanel()
             {
                 this.AutoScroll = true; // Bật tính năng cuộn
             }
-        }
-
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            Menu menu = new Menu();
-            menu.Show();
         }
         public void InitializeDeckImages()
         {
@@ -974,8 +962,17 @@ namespace UnoOnline
                 Controls.Add(deckLabel);
             }
         }
-        
 
+        //Hàm disable mọi button đầu game
+        public void DisableAllButton()
+        {
+            drawCardButton.Enabled = false;
+            yellUNOButton.Enabled = false;
+            foreach (Button cardButton in PlayerHandPanel.Controls)
+            {
+                cardButton.Enabled = false;
+            }
+        }
 
 
         private void InitializeChatPanel()

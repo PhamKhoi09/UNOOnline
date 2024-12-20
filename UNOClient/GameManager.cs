@@ -134,6 +134,7 @@ namespace UnoOnline
                         form1.UpdateCurrentCardDisplay(Instance.CurrentCard);
                         //DisplayOtherPlayerHand
                         form1.InitializeDeckImages();
+                        form1.DisableAllButton();
                     }
                 }));
             }
