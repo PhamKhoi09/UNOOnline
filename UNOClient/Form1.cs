@@ -531,6 +531,18 @@ namespace UnoOnline
             Controls.Add(clientInfoLabel);
 
             // PictureBox for current card
+            // Label for client info
+            clientInfoLabel = new Label
+            {
+                Size = new Size(200, 30),
+                Text = $"{Program.player.Name}: {GameManager.Instance.Players[0].Hand.Count}",
+                Font = new Font("Arial", 14),
+                BackColor = Color.Transparent,
+                Location = new Point(10, 10) // Góc trên bên trái
+            };
+            Controls.Add(clientInfoLabel);
+
+            // PictureBox for current card
             currentCardPictureBox = new PictureBox
             {
                 Size = new Size(this.ClientSize.Width / 6, this.ClientSize.Height / 3),
@@ -730,13 +742,13 @@ namespace UnoOnline
         private void GreenButton_Click(object sender, EventArgs e)
         {
             GameManager.Instance.CurrentCard.Color = "Green";
-            ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count ).ToString(), GameManager.Instance.CurrentCard.CardName, GameManager.Instance.CurrentCard.Color }));
+            ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count).ToString(), GameManager.Instance.CurrentCard.CardName, GameManager.Instance.CurrentCard.Color }));
             DisableCardAndDrawButton();
         }
         private void YellowButton_Click(object sender, EventArgs e)
         {
             GameManager.Instance.CurrentCard.Color = "Yellow";
-            ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count ).ToString(), GameManager.Instance.CurrentCard.CardName, GameManager.Instance.CurrentCard.Color }));
+            ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count).ToString(), GameManager.Instance.CurrentCard.CardName, GameManager.Instance.CurrentCard.Color }));
             DisableCardAndDrawButton();
         }
         private void BlueButton_Click(object sender, EventArgs e)
@@ -756,19 +768,12 @@ namespace UnoOnline
                 // Gửi thông điệp đến server theo định dạng DanhBai;ID;SoLuongBaiTrenTay;CardName;color
                 if (selectedCard.Color == "Wild")
                 {
-<<<<<<< Updated upstream
-                    //Hiển thị form chọn màu, bên dưới chỉ là giả sử
-                    //string color = Form1.ColorPicker();
-                    string color = "Red";
-                    selectedCard.Color = color;
-=======
                     // Enable các nút chọn màu
                     EnableColorButtons();
                 }
                 else
                 {
                     ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count - 1).ToString(), selectedCard.CardName, selectedCard.Color }));
->>>>>>> Stashed changes
                 }
                 ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count - 1).ToString(), selectedCard.CardName, selectedCard.Color }));
                 GameManager.Instance.CurrentCard = selectedCard;
@@ -927,16 +932,7 @@ namespace UnoOnline
             Menu menu = new Menu();
             menu.Show();
         }
-<<<<<<< Updated upstream
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
-        private void InitializeDeckImages()
-=======
         public void InitializeDeckImages()
->>>>>>> Stashed changes
         {
             // Clear existing deck images and labels
             var existingDeckImages = Controls.OfType<PictureBox>().Where(pb => pb.Tag != null && pb.Tag.ToString() == "DeckImage").ToList();

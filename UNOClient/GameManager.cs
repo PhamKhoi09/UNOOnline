@@ -87,10 +87,9 @@ namespace UnoOnline
                 string color = card[0];
                 string value = card[1];
                 if (color == "Wild" && value != "Draw")
-                    if (color == "Wild" && value != "Draw")
-                    {
-                        value = "Wild";
-                    }
+                {
+                    value = "Wild";
+                }
                 return new Card(cardData, color, value);
             }).ToList();
 
@@ -124,74 +123,58 @@ namespace UnoOnline
             }
         }
 
-        Player player = Instance.Players.FirstOrDefault(p => p.Name == playerName);
-            if (player == null)
-            {
-                player = new Player(playerName);
-        Instance.Players.Add(player);
-            }
-    player.Hand = new List<Card>(new Card[cardCount]); // Update the Hand property to reflect the correct number of cards
-
-            Form1 form = Application.OpenForms.OfType<Form1>().FirstOrDefault();
-            if (form != null)
-            {
-                form.Invoke(new Action(() => form.InitializeDeckImages()));
-            }
+        public void AddPlayer(Player player)
+        {
+            Instance.Players.Add(player);
         }
 
-        public void AddPlayer(Player player)
-{
-    Instance.Players.Add(player);
-}
-
-
-public static void Boot()
-{
-    //Mở màn hình game mở (nếu chưa)
-    if (!Program.IsFormOpen(typeof(Form1)))
-    {
-        Application.OpenForms[0].Invoke(new Action(() =>
+        public static void Boot()
         {
+            //Mở màn hình game mở (nếu chưa)
             if (!Program.IsFormOpen(typeof(Form1)))
             {
-                Form1 form1 = new Form1();
-                form1.Show();
-                form1.DisplayPlayerHand(Instance.Players[0].Hand);
-                form1.UpdateCurrentCardDisplay(Instance.CurrentCard);
-                //DisplayOtherPlayerHand
+                Application.OpenForms[0].Invoke(new Action(() =>
+                {
+                    if (!Program.IsFormOpen(typeof(Form1)))
+                    {
+                        Form1 form1 = new Form1();
+                        form1.Show();
+                        form1.DisplayPlayerHand(Instance.Players[0].Hand);
+                        form1.UpdateCurrentCardDisplay(Instance.CurrentCard);
+                        //DisplayOtherPlayerHand
+                    }
+                }));
             }
-        }));
-    }
-}
-
-<<<<<<< Updated upstream
-public void PlayCard(Player player, Card card)
-{
-}
-
-=======
->>>>>>> Stashed changes
-public bool IsValidMove(Card card)
-{
-    return card.Color == Instance.CurrentCard.Color || card.Value == Instance.CurrentCard.Value || card.Color == "Wild" || (Instance.CurrentCard.CardName.Contains("Wild") && card.CardName.Contains("Wild"));
-}
-
-
-public void HandleUpdate(Message message)
-{
-    try
-    {
-        // Message received: Update; ID; RemainingCards; CardName (if a card is played); color (if the card is a wild card)
-        string playerId = message.Data[0];
-        int remainingCards = int.Parse(message.Data[1]);
-
-        // Find the player in the list
-        Player player = Instance.Players.FirstOrDefault(p => p.Name == playerId);
-        if (player != null)
-        {
-            player.Hand = new List<Card>(new Card[remainingCards]); // Update the Hand property to reflect the correct number of cards
-            player.Hand = new List<Card>(new Card[remainingCards]); // Update the Hand property to reflect the correct number of cards
         }
+
+        public bool IsValidMove(Card card)
+        {
+            return card.Color == Instance.CurrentCard.Color || card.Value == Instance.CurrentCard.Value || card.Color == "Wild" || (Instance.CurrentCard.CardName.Contains("Wild") && card.CardName.Contains("Wild"));
+        }
+
+        public void HandleUpdate(Message message)
+        {
+            try
+            {
+                string[] data = message.Data.ToArray();
+                // Message received: Update; ID; RemainingCards; CardName (if a card is played); color (if the card is a wild card)
+                if (data.Length < 2)
+                {
+                    throw new ArgumentException("Invalid message data: not enough elements.");
+                }
+
+                string playerId = data[0];
+                if (!int.TryParse(data[1], out int remainingCards))
+                {
+                    throw new FormatException("Input string was not in a correct format.");
+                }
+
+                // Find the player in the list
+                Player player = Instance.Players.FirstOrDefault(p => p.Name == playerId);
+                if (player != null)
+                {
+                    player.Hand = new List<Card>(new Card[remainingCards]); // Update the Hand property to reflect the correct number of cards
+                }
 
         if (playerId != Program.player.Name)
         {
@@ -221,78 +204,21 @@ public void HandleUpdate(Message message)
             }
         }
 
-        // Update the UI
-        Form1 form1 = (Form1)Application.OpenForms.OfType<Form1>().FirstOrDefault();
-        if (form1 != null)
-        {
-            form1.Invoke(new Action(() =>
-            {
-                if (Instance.CurrentCard != null)
-                {
-                    form1.UpdateCurrentCardDisplay(Instance.CurrentCard);
-                }
-                else
-                {
-                    MessageBox.Show("CurrentCard is null.");
-                }
-                form1.InitializeDeckImages(); // Refresh the deck images and labels
-                form1.InitializeDeckImages(); // Refresh the deck images and labels
-            }));
-        }
-        else
-        {
-            MessageBox.Show("Form1 is null.");
-        }
-    }
-    catch (NullReferenceException ex)
-    {
-        MessageBox.Show("Object not initialized: " + ex.Message);
-    }
-}
-
-
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
-public static void HandleTurnMessage(Message message)
-{
-    try
-    {
-        string playerId = message.Data[0];
-        MessageBox.Show($"Handling Turn message for player: {playerId}");
-
-        if (playerId == Program.player.Name)
-        {
-            MessageBox.Show("It's the current player's turn.");
-
-<<<<<<< Updated upstream
-            if (Instance.CurrentCard.CardName.Contains("Draw"))
-=======
-                    if (Instance.CurrentCard.CardName.Contains("Draw") && Instance.IsSpecialDraw == true) //Bị rút bài
->>>>>>> Stashed changes
-            {
-                if (Instance.CurrentCard.CardName.Contains("Wild"))
-                {
-                    // Draw 4
-                    ClientSocket.SendData(new Message(MessageType.SpecialCardEffect, new List<string> { Program.player.Name, (Instance.Players[0].Hand.Count + 4).ToString() }));
-                    //Thoát hàm
-
-                }
-                else
-                {
-                    // Draw 2
-                    ClientSocket.SendData(new Message(MessageType.SpecialCardEffect, new List<string> { Program.player.Name, (Instance.Players[0].Hand.Count + 2).ToString() }));
-                }
-            }
-            else
-            {
-                //Enable EnableCardAndDrawButton on form1
-                Form1 form1 = Application.OpenForms.OfType<Form1>().FirstOrDefault();
+                // Update the UI
+                Form1 form1 = (Form1)Application.OpenForms.OfType<Form1>().FirstOrDefault();
                 if (form1 != null)
                 {
                     form1.Invoke(new Action(() =>
                     {
-                        form1.EnableCardAndDrawButton();
+                        if (Instance.CurrentCard != null)
+                        {
+                            form1.UpdateCurrentCardDisplay(Instance.CurrentCard);
+                        }
+                        else
+                        {
+                            MessageBox.Show("CurrentCard is null.");
+                        }
+                        form1.InitializeDeckImages(); // Refresh the deck images and labels
                     }));
                 }
                 else
@@ -300,27 +226,97 @@ public static void HandleTurnMessage(Message message)
                     MessageBox.Show("Form1 is null.");
                 }
             }
+            catch (FormatException ex)
+            {
+                MessageBox.Show("Input string was not in a correct format: " + ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show("Invalid card data: " + ex.Message);
+            }
+            catch (NullReferenceException ex)
+            {
+                MessageBox.Show("Object not initialized: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Unexpected error: " + ex.Message);
+            }
         }
-    }
-    catch (Exception ex)
-    {
-        MessageBox.Show($"Error in HandleTurnMessage: {ex.Message}\n{ex.StackTrace}");
-        throw;
-    }
-}
-public static void HandleSpecialDraw(Message message)
-{
-    //Specialdraws; ID; CardName; CardName...
-    string playerId = message.Data[0];
-    Player player = Instance.Players.FirstOrDefault(p => p.Name == playerId);
-    for (int i = 1; i < message.Data.Count; i++)
-    {
-        string cardName = message.Data[i];
-        string[] card = cardName.Split('_');
-        string color = card[0];
-        string value = card[1];
-        player.Hand.Add(new Card(cardName, color, value));
-    }
+
+        public static void HandleTurnMessage(Message message)
+        {
+            try
+            {
+                string playerId = message.Data[0];
+                Form1.UpdateCurrentPlayerLabel(playerId);
+                if (playerId == Program.player.Name)
+                {
+                    MessageBox.Show("It's the current player's turn.");
+
+                    if (Instance.CurrentCard.CardName.Contains("Draw") && Instance.IsSpecialDraw == true) //Bị rút bài
+                    {
+                        if (Instance.CurrentCard.CardName.Contains("Wild"))
+                            // Draw 4
+                            ClientSocket.SendData(new Message(MessageType.SpecialCardEffect, new List<string> { Program.player.Name, (Instance.Players[0].Hand.Count + 4).ToString() }));
+                        else
+                            // Draw 2
+                            ClientSocket.SendData(new Message(MessageType.SpecialCardEffect, new List<string> { Program.player.Name, (Instance.Players[0].Hand.Count + 2).ToString() }));
+                    }
+                    else
+                    {
+                        //Enable EnableCardAndDrawButton on form1
+                        Form1 form1 = Application.OpenForms.OfType<Form1>().FirstOrDefault();
+                        if (form1 != null)
+                        {
+                            form1.Invoke(new Action(() =>
+                            {
+                                form1.EnableCardAndDrawButton();
+                            }));
+                        }
+                        else
+                        {
+                            MessageBox.Show("Form1 is null.");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error in HandleTurnMessage: {ex.Message}\n{ex.StackTrace}");
+                throw;
+            }
+        }
+
+        public static void HandleSpecialDraw(Message message)
+        {
+            try
+            {
+                // Specialdraws;anle;Yellow_Skip_;Green_Draw;Green_7;Red_3;
+                string[] data = message.Data.ToArray();
+                if (data.Length < 2)
+                {
+                    throw new ArgumentException("Invalid message data: not enough elements.");
+                }
+
+                List<string> cardNames = new List<string>(data.Skip(1)); // Skip the first part which is not card data
+
+                // Add the cards to the player's hand
+                Instance.Players[0].Hand.AddRange(cardNames.Select(cardData =>
+                {
+                    string[] card = cardData.Split(new[] { '_' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (card.Length < 2)
+                    {
+                        throw new ArgumentException($"Invalid card data: {cardData}");
+                    }
+                    string color = card[0];
+                    string value = card[1];
+                    if (color == "Wild" && value != "Draw")
+                    {
+                        value = "Wild";
+                    }
+                    return new Card(cardData, color, value);
+                }).ToList());
 
     //Hiển thị bài trên tay
     Form1.ActiveForm.Invoke(new Action(() =>
@@ -336,72 +332,84 @@ public static void HandleSpecialDraw(Message message)
                         form1.DisplayPlayerHand(Instance.Players[0].Hand);
                         form1.InitializeDeckImages(); // Refresh the deck images and labels
                     }));
->>>>>>> Stashed changes
+                }
+                else
+                {
+                    MessageBox.Show("Form1 is null.");
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show("Invalid card data: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Unexpected error: " + ex.Message);
+            }
         }
-    }));
-}
 
-public static void HandleCardDraw(Message message)
-{
-    string playerName = message.Data[0];
-    string cardName = message.Data[1];
-    string[] card = cardName.Split('_');
-    string color = card[0];
-    string value = card[1];
-    Instance.Players[0].Hand.Add(new Card(cardName, color, value));
+        public static void HandleCardDraw(Message message)
+        {
+            string playerName = message.Data[0];
+            string cardName = message.Data[1];
+            string[] card = cardName.Split('_');
+            string color = card[0];
+            string value = card[1];
+            Instance.Players[0].Hand.Add(new Card(cardName, color, value));
 
-    Form1 form = Application.OpenForms.OfType<Form1>().FirstOrDefault();
-    if (form != null)
-    {
-        form.Invoke(new Action(() => form.InitializeDeckImages())); // Refresh the deck images and labels
-    }
+            Form1 form = Application.OpenForms.OfType<Form1>().FirstOrDefault();
+            if (form != null)
+            {
+                form.Invoke(new Action(() => form.InitializeDeckImages())); // Refresh the deck images and labels
+            }
+        }
 
-    Form1 form = Application.OpenForms.OfType<Form1>().FirstOrDefault();
-    if (form != null)
-    {
-        form.Invoke(new Action(() => form.InitializeDeckImages())); // Refresh the deck images and labels
-    }
-}
+        public static void Penalty(Message message)
+        {
+            string playerGotPenalty = message.Data[0];
+            if (playerGotPenalty == Program.player.Name)
+            {
+                MessageBox.Show("You got penalty for not pressing the UNO button!");
+                ClientSocket.SendData(new Message(MessageType.DrawPenalty, new List<string> { Program.player.Name }));
+            }
+        }
 
+        public static void HandleChatMessage(Message message)
+        {
+            string playerName = message.Data[0];
+            string chatMessage = message.Data[1];
+            //Hiển thị lên form1 AddChatMessage
+            Form1 form1 = Application.OpenForms.OfType<Form1>().FirstOrDefault();
+            if (form1 != null)
+            {
+                form1.Invoke(new Action(() =>
+                {
+                    form1.AddChatMessage(playerName, chatMessage);
+                }));
+            }
+            else
+            {
+                MessageBox.Show("Form1 is null.");
+            }
+        }
 
-public static void Penalty(Message message)
-{
-    string playerGotPenalty = message.Data[0];
-    if (playerGotPenalty == Program.player.Name)
-    {
-        MessageBox.Show("You got penalty for not pressing the UNO button!");
-        ClientSocket.SendData(new Message(MessageType.DrawPenalty, new List<string> { Program.player.Name }));
-        ClientSocket.SendData(new Message(MessageType.DrawPenalty, new List<string> { Program.player.Name }));
-    }
-}
-
-
-public static void HandleChatMessage(Message message)
-{
-    string playerName = message.Data[0];
-    string chatMessage = message.Data[1];
-    //Hiển thị lên form1
-    // VD vầy Form1.DisplayChatMessage(playerName, chatMessage);
-}
-
-public static void HandleEndMessage(Message message)
         public static void HandleEndMessage(Message message)
-{
-    string[] data = message.Data.ToArray();
-    string winnerName = data[0];
-    int PenaltyPoint = Instance.Players[0].Hand.Count * 10;
-    if (winnerName == Program.player.Name)
-    {
-        WinResult winResult = new WinResult();
-        winResult.Show();
-    }
-    else
-    {
-        ClientSocket.SendData(new Message(MessageType.Diem, new List<string> { Program.player.Name, PenaltyPoint.ToString() }));
-        LoseResult loseResult = new LoseResult();
-        loseResult.Show();
-    }
-}
+        {
+            string[] data = message.Data.ToArray();
+            string winnerName = data[0];
+            int PenaltyPoint = Instance.Players[0].Hand.Count * 10;
+            if (winnerName == Program.player.Name)
+            {
+                WinResult winResult = new WinResult();
+                winResult.Show();
+            }
+            else
+            {
+                ClientSocket.SendData(new Message(MessageType.Diem, new List<string> { Program.player.Name, PenaltyPoint.ToString() }));
+                LoseResult loseResult = new LoseResult();
+                loseResult.Show();
+            }
+        }
 
 public static void HandleResult(Message message)
 {
@@ -419,43 +427,28 @@ public static void HandleResult(Message message)
     FinalRanking.DisplayRanking(Instance.Players);
 }
 
-public static void HandleDisconnect(Message message)
-{
-    var disconnectingPlayer = ClientSocket.gamemanager.Players.FirstOrDefault(p => p.Name == message.Data[0]);
-    if (disconnectingPlayer != null)
-    {
-        ClientSocket.gamemanager.Players.Remove(disconnectingPlayer);
-    }
-}
+        public static void HandleDisconnect(Message message)
+        {
+            var disconnectingPlayer = ClientSocket.gamemanager.Players.FirstOrDefault(p => p.Name == message.Data[0]);
+            if (disconnectingPlayer != null)
+            {
+                ClientSocket.gamemanager.Players.Remove(disconnectingPlayer);
+            }
+        }
     }
     public class Player
-{
-    public string Name { get; set; }
-    public List<Card> Hand { get; set; }
-    public int HandCount => Hand.Count; // Update this property to reflect the actual number of cards in the hand
-    public bool IsTurn { get; set; }
-    public int Points { get; set; }
-    public int Rank { get; set; }
-
-    public Player(string name)
     {
-        Name = name;
-        Hand = new List<Card>();
-    }
-}
-public class Player
-{
-    public string Name { get; set; }
-    public List<Card> Hand { get; set; }
-    public int HandCount => Hand.Count; // Update this property to reflect the actual number of cards in the hand
-    public bool IsTurn { get; set; }
-    public int Points { get; set; }
-    public int Rank { get; set; }
+        public string Name { get; set; }
+        public List<Card> Hand { get; set; }
+        public int HandCount => Hand.Count; // Update this property to reflect the actual number of cards in the hand
+        public bool IsTurn { get; set; }
+        public int Points { get; set; }
+        public int Rank { get; set; }
 
-    public Player(string name)
-    {
-        Name = name;
-        Hand = new List<Card>();
+        public Player(string name)
+        {
+            Name = name;
+            Hand = new List<Card>();
+        }
     }
-}
 }
