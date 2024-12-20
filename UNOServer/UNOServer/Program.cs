@@ -615,7 +615,11 @@ namespace UNOServer
             for (int i = 0; i < PLAYERLIST.Count; i++)
             {
                 if (PLAYERLIST[i].ID == WinnerName)
+                {
                     PLAYERLIST[i].Diem += int.Parse(Signal[2]);
+                    Console.WriteLine("Điểm của người thắng " + WinnerName + ": " + PLAYERLIST[i].Diem);
+                    break;
+                }
             }
         }
 
@@ -628,9 +632,17 @@ namespace UNOServer
                 if (PLAYERLIST[i].ID == Signal[1])
                 {
                     if (Signal[0] == "Restart")
+                    {
                         DemRestart += 1;
+                        Console.WriteLine(Signal[1] + " đã chọn Restart");
+                        break;
+                    }                       
                     if (Signal[0] == "Finish")
+                    {
                         DemFinish += 1;
+                        Console.WriteLine(Signal[1] + " đã chọn Finish");
+                        break;
+                    }                          
                 }
             }
             //Nếu đủ số người đã chọn thì quyết định restart hay hiện màn hình xếp hạng kết thúc.
@@ -664,6 +676,7 @@ namespace UNOServer
                             }
                         }
                     }
+                    Console.WriteLine("Game đã kết thúc hoàn toàn! Bye bye.");
                 }
                 else
                 {
@@ -675,6 +688,7 @@ namespace UNOServer
                     DemRestart = 0;
                     WinnerName = "";
                     SetupGame(Signal, User);  //Đủ người thì lại thiết lập bắt đầu trò chơi
+                    Console.WriteLine("Đủ người chơi muốn restart, bắt đầu lại...");
                 }
             }
         }
