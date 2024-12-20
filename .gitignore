@@ -93,3 +93,5 @@ TestResult-*.
 *.tmp
 *.tmp_proj
 *.tmp_proj.user
+UNOClient/Database1.mdf
+UNOClient/Database1_log.ldf
