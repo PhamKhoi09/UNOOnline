@@ -138,6 +138,7 @@ namespace UnoOnline
                         break;
                     case MessageType.NotEnoughPlayers:
                         // Handle not enough players
+                        GameManager.HandleNotEnoughPlayer(message);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -171,6 +172,7 @@ namespace UnoOnline
             catch 
             {
                 MessageBox.Show("Xin lỗi bạn, server đang bị lỗi, chúng tôi sẽ khắc phục trong thời gian nhanh nhất");
+                //Tắt app
             }
         }
 

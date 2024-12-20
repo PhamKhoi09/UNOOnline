@@ -114,19 +114,10 @@ namespace UnoOnline
                 player = new Player(playerName);
                 Instance.Players.Add(player);
             }
-            player.Hand = new List<Card>(new Card[cardCount]); // Update the Hand property to reflect the correct number of cards
+            player.HandCount = cardCount;
 
-            Form1 form = Application.OpenForms.OfType<Form1>().FirstOrDefault();
-            if (form != null)
-            {
-                form.Invoke(new Action(() => form.InitializeDeckImages()));
-            }
         }
 
-        public void AddPlayer(Player player)
-        {
-            Instance.Players.Add(player);
-        }
 
         public static void Boot()
         {
@@ -142,6 +133,8 @@ namespace UnoOnline
                         form1.DisplayPlayerHand(Instance.Players[0].Hand);
                         form1.UpdateCurrentCardDisplay(Instance.CurrentCard);
                         //DisplayOtherPlayerHand
+                        form1.InitializeDeckImages();
+                        form1.DisableAllButton();
                     }
                 }));
             }
@@ -149,6 +142,10 @@ namespace UnoOnline
 
         public bool IsValidMove(Card card)
         {
+            if (card == null)
+            {
+                throw new ArgumentNullException(nameof(card), "Card cannot be null");
+            }
             return card.Color == Instance.CurrentCard.Color || card.Value == Instance.CurrentCard.Value || card.Color == "Wild" ;
         }
 
@@ -173,11 +170,12 @@ namespace UnoOnline
                 Player player = Instance.Players.FirstOrDefault(p => p.Name == playerId);
                 if (player != null)
                 {
-                    player.Hand = new List<Card>(new Card[remainingCards]); // Update the Hand property to reflect the correct number of cards
+                    player.HandCount = remainingCards;
                 }
 
                 if (playerId != Program.player.Name)
                 {
+                    Instance.IsSpecialDraw = false;
                     // If another player has played a card
                     if (data.Length == 3)
                     {
@@ -348,23 +346,19 @@ namespace UnoOnline
                 }).ToList());
 
                 //Hiển thị bài trên tay
-                Form1.ActiveForm.Invoke(new Action(() =>
+                Form1 form1 = (Form1)Application.OpenForms.OfType<Form1>().FirstOrDefault();
+                if (form1 != null)
                 {
-                    Form1 form1 = (Form1)Application.OpenForms.OfType<Form1>().FirstOrDefault();
-                    if (form1 != null)
+                    form1.Invoke(new Action(() =>
                     {
                         form1.DisplayPlayerHand(Instance.Players[0].Hand);
-                        form1.Invoke(new Action(() =>
-            {
-                form1.DisplayPlayerHand(Instance.Players[0].Hand);
-                form1.InitializeDeckImages(); // Refresh the deck images and labels
-            }));
-                    }
-                    else
-                    {
-                        MessageBox.Show("Form1 is null.");
-                    }
-                }));
+                        form1.InitializeDeckImages();
+                    }));
+                }
+                else
+                {
+                    MessageBox.Show("Form1 is null.");
+                }
             }
             catch (ArgumentException ex)
             {
@@ -385,10 +379,14 @@ namespace UnoOnline
             string value = card[1];
             Instance.Players[0].Hand.Add(new Card(cardName, color, value));
 
-            Form1 form = Application.OpenForms.OfType<Form1>().FirstOrDefault();
-            if (form != null)
+            Form1 form1 = Application.OpenForms.OfType<Form1>().FirstOrDefault();
+            if (form1 != null)
             {
-                form.Invoke(new Action(() => form.InitializeDeckImages())); // Refresh the deck images and labels
+                form1.Invoke(new Action(() =>
+                {
+                    form1.DisplayPlayerHand(Instance.Players[0].Hand);
+                    form1.InitializeDeckImages();
+                }));
             }
         }
 
@@ -420,7 +418,25 @@ namespace UnoOnline
                 MessageBox.Show("Form1 is null.");
             }
         }
-
+        public static void HandleNotEnoughPlayer(Message message)
+        {
+            //Hiển thị thông báo không đủ người chơi nếu form1 chưa bật
+            //Hiển thị thông báo kết thúc game vì có người chơi thoát đột ngột ( và số người chơi còn lại ít hơn 2)
+            if(!Program.IsFormOpen(typeof(Form1)))
+            {
+                Application.OpenForms[0].Invoke(new Action(() =>
+                {
+                    MessageBox.Show("Not enough players to start the game.");
+                }));
+            }
+            else
+            {
+                Application.OpenForms[0].Invoke(new Action(() =>
+                {
+                    MessageBox.Show("Game ended because a player left the game.");
+                }));
+            }
+        }
         public static void HandleEndMessage(Message message)
         {
             string[] data = message.Data.ToArray();
@@ -443,11 +459,24 @@ namespace UnoOnline
                     loseResult.Show();
                 }));
             }
+            
+            //Clear players hand
+            Instance.Players[0].Hand.Clear();
+
+            //Close Form1
+            Form1 form1 = Application.OpenForms.OfType<Form1>().FirstOrDefault();
+            if (form1 != null)
+            {
+                form1.Invoke(new Action(() =>
+                {
+                    form1.Close();
+                }));
+            }
         }
 
         public static void HandleResult(Message message)
         {
-            //Result;ID;Diem;Rank
+            // Result;ID;Diem;Rank
             string playerId = message.Data[0];
             int points = int.Parse(message.Data[1]);
             int rank = int.Parse(message.Data[2]);
@@ -459,7 +488,8 @@ namespace UnoOnline
             }
             Application.OpenForms[0].Invoke(new Action(() =>
             {
-                FinalRanking finalRanking = new FinalRanking();
+                FinalRanking finalRanking = FinalRanking.Instance;
+                finalRanking.DisplayRanking(GameManager.Instance.Players);
                 finalRanking.Show();
             }));
         }
