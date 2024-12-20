@@ -31,7 +31,6 @@ namespace UnoOnline
                 return instance;
             }
         }
-
         private GameManager()
         {
             Players = new List<Player>();
@@ -87,7 +86,7 @@ namespace UnoOnline
                 string[] card = cardData.Split('_');
                 string color = card[0];
                 string value = card[1];
-                if (color =="Wild" && value != "Draw")
+                if (color == "Wild" && value != "Draw")
                 {
                     value = "Wild";
                 }
@@ -109,15 +108,26 @@ namespace UnoOnline
             int turnOrder = int.Parse(data[1]);
             int cardCount = int.Parse(data[2]);
 
-            Player player = new Player(playerName);
-            player.HandCount = cardCount;
+            Player player = Instance.Players.FirstOrDefault(p => p.Name == playerName);
+            if (player == null)
+            {
+                player = new Player(playerName);
+                Instance.Players.Add(player);
+            }
+            player.Hand = new List<Card>(new Card[cardCount]); // Update the Hand property to reflect the correct number of cards
 
-            Instance.AddPlayer(player);
+            Form1 form = Application.OpenForms.OfType<Form1>().FirstOrDefault();
+            if (form != null)
+            {
+                form.Invoke(new Action(() => form.InitializeDeckImages()));
+            }
         }
+
         public void AddPlayer(Player player)
         {
             Instance.Players.Add(player);
         }
+
         public static void Boot()
         {
             //Mở màn hình game mở (nếu chưa)
@@ -136,10 +146,12 @@ namespace UnoOnline
                 }));
             }
         }
+
         public bool IsValidMove(Card card)
         {
             return card.Color == Instance.CurrentCard.Color || card.Value == Instance.CurrentCard.Value || card.Color == "Wild" ;
         }
+
         public void HandleUpdate(Message message)
         {
             try
@@ -161,7 +173,7 @@ namespace UnoOnline
                 Player player = Instance.Players.FirstOrDefault(p => p.Name == playerId);
                 if (player != null)
                 {
-                    player.HandCount = remainingCards;
+                    player.Hand = new List<Card>(new Card[remainingCards]); // Update the Hand property to reflect the correct number of cards
                 }
 
                 if (playerId != Program.player.Name)
@@ -230,6 +242,7 @@ namespace UnoOnline
                         {
                             MessageBox.Show("CurrentCard is null.");
                         }
+                        form1.InitializeDeckImages(); // Refresh the deck images and labels
                     }));
                 }
                 else
@@ -258,6 +271,7 @@ namespace UnoOnline
                 MessageBox.Show("Unexpected error: " + ex.Message);
             }
         }
+
         public static void HandleTurnMessage(Message message)
         {
             try
@@ -268,7 +282,7 @@ namespace UnoOnline
                 {
                     //MessageBox.Show("It's the current player's turn.");
 
-                    if (Instance.CurrentCard.CardName.Contains("Draw") && Instance.IsSpecialDraw == true ) //Bị rút bài
+                    if (Instance.CurrentCard.CardName.Contains("Draw") && Instance.IsSpecialDraw == true) //Bị rút bài
                     {
                         Instance.IsSpecialDraw = false;
                         if (Instance.CurrentCard.CardName.Contains("Wild"))
@@ -333,18 +347,24 @@ namespace UnoOnline
                     return new Card(cardData, color, value);
                 }).ToList());
 
-                Form1 form1 = Application.OpenForms.OfType<Form1>().FirstOrDefault();
-                if (form1 != null)
+                //Hiển thị bài trên tay
+                Form1.ActiveForm.Invoke(new Action(() =>
                 {
-                    form1.Invoke(new Action(() =>
+                    Form1 form1 = (Form1)Application.OpenForms.OfType<Form1>().FirstOrDefault();
+                    if (form1 != null)
                     {
                         form1.DisplayPlayerHand(Instance.Players[0].Hand);
-                    }));
-                }
-                else
-                {
-                    MessageBox.Show("Form1 is null.");
-                }
+                        form1.Invoke(new Action(() =>
+            {
+                form1.DisplayPlayerHand(Instance.Players[0].Hand);
+                form1.InitializeDeckImages(); // Refresh the deck images and labels
+            }));
+                    }
+                    else
+                    {
+                        MessageBox.Show("Form1 is null.");
+                    }
+                }));
             }
             catch (ArgumentException ex)
             {
@@ -355,6 +375,7 @@ namespace UnoOnline
                 MessageBox.Show("Unexpected error: " + ex.Message);
             }
         }
+
         public static void HandleCardDraw(Message message)
         {
             string playerName = message.Data[0];
@@ -363,16 +384,24 @@ namespace UnoOnline
             string color = card[0];
             string value = card[1];
             Instance.Players[0].Hand.Add(new Card(cardName, color, value));
+
+            Form1 form = Application.OpenForms.OfType<Form1>().FirstOrDefault();
+            if (form != null)
+            {
+                form.Invoke(new Action(() => form.InitializeDeckImages())); // Refresh the deck images and labels
+            }
         }
+
         public static void Penalty(Message message)
         {
             string playerGotPenalty = message.Data[0];
             if (playerGotPenalty == Program.player.Name)
             {
                 MessageBox.Show("You got penalty for not pressing the UNO button!");
-                ClientSocket.SendData(new Message(MessageType.DrawPenalty, new List<string> { Program.player.Name}));
+                ClientSocket.SendData(new Message(MessageType.DrawPenalty, new List<string> { Program.player.Name }));
             }
         }
+
         public static void HandleChatMessage(Message message)
         {
             string playerName = message.Data[0];
