@@ -475,7 +475,7 @@ namespace UnoOnline
 
         public static void HandleResult(Message message)
         {
-            //Result;ID;Diem;Rank
+            // Result;ID;Diem;Rank
             string playerId = message.Data[0];
             int points = int.Parse(message.Data[1]);
             int rank = int.Parse(message.Data[2]);
@@ -487,7 +487,8 @@ namespace UnoOnline
             }
             Application.OpenForms[0].Invoke(new Action(() =>
             {
-                FinalRanking finalRanking = new FinalRanking();
+                FinalRanking finalRanking = FinalRanking.Instance;
+                finalRanking.DisplayRanking(GameManager.Instance.Players);
                 finalRanking.Show();
             }));
         }

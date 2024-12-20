@@ -12,17 +12,42 @@ namespace UnoOnline
 {
     public partial class FinalRanking : Form
     {
-        public FinalRanking()
+        private static FinalRanking instance;
+
+        public static FinalRanking Instance
+        {
+            get
+            {
+                if (instance == null || instance.IsDisposed)
+                {
+                    instance = new FinalRanking();
+                }
+                return instance;
+            }
+        }
+
+        private FinalRanking()
         {
             InitializeComponent();
-            DisplayRanking(GameManager.Instance.Players);
         }
+
         public void DisplayRanking(List<Player> players)
         {
-            // Sắp xếp danh sách người chơi theo điểm số giảm dần
+            // Clear previous entries
+            NameTop1.Text = string.Empty;
+            Point1.Text = string.Empty;
+            NameTop2.Text = string.Empty;
+            Point2.Text = string.Empty;
+            NameTop3.Text = string.Empty;
+            Point3.Text = string.Empty;
+            NameTop4.Text = string.Empty;
+            Point4.Text = string.Empty;
+
+            // Sort players by points in descending order
             players.Sort((x, y) => y.Points.CompareTo(x.Points));
-            // Hiển thị danh sách người chơi top 1 2 3 4  và điểm của họ
-            for (int i = 0; i < players.Count; i++)
+
+            // Display top 4 players and their points
+            for (int i = 0; i < players.Count && i < 4; i++)
             {
                 if (i == 0)
                 {
@@ -46,9 +71,10 @@ namespace UnoOnline
                 }
             }
         }
+
         private void FinalRanking_FormClosing(object sender, FormClosingEventArgs e)
         {
-
+            instance = null; // Reset instance on form close
         }
     }
 }
