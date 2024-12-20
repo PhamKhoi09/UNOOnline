@@ -114,19 +114,10 @@ namespace UnoOnline
                 player = new Player(playerName);
                 Instance.Players.Add(player);
             }
-            player.Hand = new List<Card>(new Card[cardCount]); // Update the Hand property to reflect the correct number of cards
+            player.HandCount = cardCount;
 
-            Form1 form = Application.OpenForms.OfType<Form1>().FirstOrDefault();
-            if (form != null)
-            {
-                form.Invoke(new Action(() => form.InitializeDeckImages()));
-            }
         }
 
-        public void AddPlayer(Player player)
-        {
-            Instance.Players.Add(player);
-        }
 
         public static void Boot()
         {
@@ -142,6 +133,7 @@ namespace UnoOnline
                         form1.DisplayPlayerHand(Instance.Players[0].Hand);
                         form1.UpdateCurrentCardDisplay(Instance.CurrentCard);
                         //DisplayOtherPlayerHand
+                        form1.InitializeDeckImages();
                     }
                 }));
             }
@@ -149,6 +141,10 @@ namespace UnoOnline
 
         public bool IsValidMove(Card card)
         {
+            if (card == null)
+            {
+                throw new ArgumentNullException(nameof(card), "Card cannot be null");
+            }
             return card.Color == Instance.CurrentCard.Color || card.Value == Instance.CurrentCard.Value || card.Color == "Wild" ;
         }
 
@@ -173,11 +169,12 @@ namespace UnoOnline
                 Player player = Instance.Players.FirstOrDefault(p => p.Name == playerId);
                 if (player != null)
                 {
-                    player.Hand = new List<Card>(new Card[remainingCards]); // Update the Hand property to reflect the correct number of cards
+                    player.HandCount = remainingCards;
                 }
 
                 if (playerId != Program.player.Name)
                 {
+                    Instance.IsSpecialDraw = false;
                     // If another player has played a card
                     if (data.Length == 3)
                     {
@@ -348,23 +345,19 @@ namespace UnoOnline
                 }).ToList());
 
                 //Hiển thị bài trên tay
-                Form1.ActiveForm.Invoke(new Action(() =>
+                Form1 form1 = (Form1)Application.OpenForms.OfType<Form1>().FirstOrDefault();
+                if (form1 != null)
                 {
-                    Form1 form1 = (Form1)Application.OpenForms.OfType<Form1>().FirstOrDefault();
-                    if (form1 != null)
+                    form1.Invoke(new Action(() =>
                     {
                         form1.DisplayPlayerHand(Instance.Players[0].Hand);
-                        form1.Invoke(new Action(() =>
-            {
-                form1.DisplayPlayerHand(Instance.Players[0].Hand);
-                form1.InitializeDeckImages(); // Refresh the deck images and labels
-            }));
-                    }
-                    else
-                    {
-                        MessageBox.Show("Form1 is null.");
-                    }
-                }));
+                        form1.InitializeDeckImages();
+                    }));
+                }
+                else
+                {
+                    MessageBox.Show("Form1 is null.");
+                }
             }
             catch (ArgumentException ex)
             {
@@ -385,10 +378,14 @@ namespace UnoOnline
             string value = card[1];
             Instance.Players[0].Hand.Add(new Card(cardName, color, value));
 
-            Form1 form = Application.OpenForms.OfType<Form1>().FirstOrDefault();
-            if (form != null)
+            Form1 form1 = Application.OpenForms.OfType<Form1>().FirstOrDefault();
+            if (form1 != null)
             {
-                form.Invoke(new Action(() => form.InitializeDeckImages())); // Refresh the deck images and labels
+                form1.Invoke(new Action(() =>
+                {
+                    form1.DisplayPlayerHand(Instance.Players[0].Hand);
+                    form1.InitializeDeckImages();
+                }));
             }
         }
 

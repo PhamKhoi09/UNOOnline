@@ -172,6 +172,7 @@ namespace UnoOnline
             catch 
             {
                 MessageBox.Show("Xin lỗi bạn, server đang bị lỗi, chúng tôi sẽ khắc phục trong thời gian nhanh nhất");
+                //Tắt app
             }
         }
 

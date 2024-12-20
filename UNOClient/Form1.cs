@@ -665,6 +665,11 @@ namespace UnoOnline
 
         public void DisplayPlayerHand(List<Card> playerHand)
         {
+            if (playerHand == null)
+            {
+                System.Diagnostics.Debug.WriteLine("Player hand cannot be null.");
+                throw new ArgumentNullException(nameof(playerHand), "Player hand cannot be null.");
+            }
             PlayerHandPanel.Controls.Clear(); // Clear existing controls
             int xOffset = 10;
             int yOffset = 10;
@@ -673,6 +678,14 @@ namespace UnoOnline
 
             foreach (var card in playerHand.ToList())
             {
+                if (card == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("Found a null card in player hand.");
+                    throw new ArgumentException("Card cannot be null", nameof(card));
+                }
+
+                System.Diagnostics.Debug.WriteLine("Displaying card: " + card.CardName);
+
                 Button cardButton = new Button
                 {
                     Size = new Size(cardWidth, cardHeight),
@@ -697,6 +710,14 @@ namespace UnoOnline
         }
         private Image GetCardImage(Card card)
         {
+            if (card == null)
+            {
+                System.Diagnostics.Debug.WriteLine("Card cannot be null.");
+                throw new ArgumentNullException(nameof(card), "Card cannot be null.");
+            }
+
+            System.Diagnostics.Debug.WriteLine("Getting image for card: " + card.CardName);
+
             // Xử lý các thẻ đặc biệt như "Wild" 
             if (card.Color == "Wild")
             {
@@ -777,9 +798,10 @@ namespace UnoOnline
         private void DrawCardButton_Click(object sender, EventArgs e)
         {
             ClientSocket.SendData(new Message(MessageType.RutBai, new List<string> { Program.player.Name, ((GameManager.Instance.Players[0].Hand.Count) + 1).ToString() }));
+            // Cập nhật giao diện
             DisplayPlayerHand(GameManager.Instance.Players[0].Hand);
-            clientInfoLabel.Text = $"{Program.player.Name}: {GameManager.Instance.Players[0].Hand.Count}";
             DisableCardAndDrawButton();
+            clientInfoLabel.Text = $"{Program.player.Name}: {GameManager.Instance.Players[0].Hand.Count}";
         }
 
         public void EnableCardAndDrawButton()
