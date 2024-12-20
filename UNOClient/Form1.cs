@@ -9,7 +9,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 
-namespace UnoOnline {
+namespace UnoOnline
+{
     public partial class Form1 : Form
     {
         //private Label currentPlayerLabel;
@@ -916,84 +917,84 @@ namespace UnoOnline {
         public void InitializeDeckImages()
 >>>>>>> Stashed changes
         {
-           // Clear existing deck images and labels
-    var existingDeckImages = Controls.OfType<PictureBox>().Where(pb => pb.Tag != null && pb.Tag.ToString() == "DeckImage").ToList();
-    var existingDeckLabels = Controls.OfType<Label>().Where(lbl => lbl.Tag != null && lbl.Tag.ToString() == "DeckLabel").ToList();
-    foreach (var deckImages in existingDeckImages)
-    {
-        Controls.Remove(deckImages);
-    }
-    foreach (var deckLabel in existingDeckLabels)
-    {
-        Controls.Remove(deckLabel);
-    }
+            // Clear existing deck images and labels
+            var existingDeckImages = Controls.OfType<PictureBox>().Where(pb => pb.Tag != null && pb.Tag.ToString() == "DeckImage").ToList();
+            var existingDeckLabels = Controls.OfType<Label>().Where(lbl => lbl.Tag != null && lbl.Tag.ToString() == "DeckLabel").ToList();
+            foreach (var deckImages in existingDeckImages)
+            {
+                Controls.Remove(deckImages);
+            }
+            foreach (var deckLabel in existingDeckLabels)
+            {
+                Controls.Remove(deckLabel);
+            }
 
-    // Load the image from the specified path
-    Image deckImage = Image.FromFile(@"Resources\CardImages\Deck.png");
+            // Load the image from the specified path
+            Image deckImage = Image.FromFile(@"Resources\CardImages\Deck.png");
 
-    // Create and configure the PictureBox controls
-    for (int i = 1; i < GameManager.Instance.Players.Count; i++) // Start from 1 to skip the current player
-    {
-        var player = GameManager.Instance.Players[i];
-        PictureBox deckPictureBox = new PictureBox
-        {
-            Size = new Size(100, 150), // Set the size of the PictureBox
-            Image = deckImage, // Set the image
-            SizeMode = PictureBoxSizeMode.StretchImage, // Ensure the image fits correctly
-            Location = new Point(this.ClientSize.Width - (120 + (i - 1) * 110), 20), // Position them horizontally with spacing on the top-right side
-            Anchor = AnchorStyles.Top | AnchorStyles.Right, // Anchor to the top-right corner
-            BorderStyle = BorderStyle.FixedSingle, // Optional: Add a border for better visibility
-            Tag = "DeckImage" // Tag to identify deck images
-        };
-    // Create and configure the PictureBox controls
-    for (int i = 1; i < GameManager.Instance.Players.Count; i++) // Start from 1 to skip the current player
-    {
-        var player = GameManager.Instance.Players[i];
-        PictureBox deckPictureBox = new PictureBox
-        {
-            Size = new Size(100, 150), // Set the size of the PictureBox
-            Image = deckImage, // Set the image
-            SizeMode = PictureBoxSizeMode.StretchImage, // Ensure the image fits correctly
-            Location = new Point(this.ClientSize.Width - (120 + (i - 1) * 110), 20), // Position them horizontally with spacing on the top-right side
-            Anchor = AnchorStyles.Top | AnchorStyles.Right, // Anchor to the top-right corner
-            BorderStyle = BorderStyle.FixedSingle, // Optional: Add a border for better visibility
-            Tag = "DeckImage" // Tag to identify deck images
-        };
+            // Create and configure the PictureBox controls
+            for (int i = 1; i < GameManager.Instance.Players.Count; i++) // Start from 1 to skip the current player
+            {
+                var player = GameManager.Instance.Players[i];
+                PictureBox deckPictureBox = new PictureBox
+                {
+                    Size = new Size(100, 150), // Set the size of the PictureBox
+                    Image = deckImage, // Set the image
+                    SizeMode = PictureBoxSizeMode.StretchImage, // Ensure the image fits correctly
+                    Location = new Point(this.ClientSize.Width - (120 + (i - 1) * 110), 20), // Position them horizontally with spacing on the top-right side
+                    Anchor = AnchorStyles.Top | AnchorStyles.Right, // Anchor to the top-right corner
+                    BorderStyle = BorderStyle.FixedSingle, // Optional: Add a border for better visibility
+                    Tag = "DeckImage" // Tag to identify deck images
+                };
+                // Create and configure the PictureBox controls
+                for (int i = 1; i < GameManager.Instance.Players.Count; i++) // Start from 1 to skip the current player
+                {
+                    var player = GameManager.Instance.Players[i];
+                    PictureBox deckPictureBox = new PictureBox
+                    {
+                        Size = new Size(100, 150), // Set the size of the PictureBox
+                        Image = deckImage, // Set the image
+                        SizeMode = PictureBoxSizeMode.StretchImage, // Ensure the image fits correctly
+                        Location = new Point(this.ClientSize.Width - (120 + (i - 1) * 110), 20), // Position them horizontally with spacing on the top-right side
+                        Anchor = AnchorStyles.Top | AnchorStyles.Right, // Anchor to the top-right corner
+                        BorderStyle = BorderStyle.FixedSingle, // Optional: Add a border for better visibility
+                        Tag = "DeckImage" // Tag to identify deck images
+                    };
 
-        // Create and configure the Label controls
-        Label deckLabel = new Label
-        {
-            Size = new Size(100, 20), // Set the size of the Label
-            Text = $"{player.Name}: {player.HandCount} cards", // Set the text of the Label
-            TextAlign = ContentAlignment.MiddleCenter, // Center the text
-            Location = new Point(deckPictureBox.Left, deckPictureBox.Bottom + 5), // Position below the PictureBox
-            Anchor = AnchorStyles.Top | AnchorStyles.Right, // Anchor to the top-right corner
-            BackColor = Color.Transparent, // Optional: Set the background color
-            Tag = "DeckLabel" // Tag to identify deck labels
-        };
-        // Create and configure the Label controls
-        Label deckLabel = new Label
-        {
-            Size = new Size(100, 20), // Set the size of the Label
-            Text = $"{player.Name}: {player.HandCount} cards", // Set the text of the Label
-            TextAlign = ContentAlignment.MiddleCenter, // Center the text
-            Location = new Point(deckPictureBox.Left, deckPictureBox.Bottom + 5), // Position below the PictureBox
-            Anchor = AnchorStyles.Top | AnchorStyles.Right, // Anchor to the top-right corner
-            BackColor = Color.Transparent, // Optional: Set the background color
-            Tag = "DeckLabel" // Tag to identify deck labels
-        };
+                    // Create and configure the Label controls
+                    Label deckLabel = new Label
+                    {
+                        Size = new Size(100, 20), // Set the size of the Label
+                        Text = $"{player.Name}: {player.HandCount} cards", // Set the text of the Label
+                        TextAlign = ContentAlignment.MiddleCenter, // Center the text
+                        Location = new Point(deckPictureBox.Left, deckPictureBox.Bottom + 5), // Position below the PictureBox
+                        Anchor = AnchorStyles.Top | AnchorStyles.Right, // Anchor to the top-right corner
+                        BackColor = Color.Transparent, // Optional: Set the background color
+                        Tag = "DeckLabel" // Tag to identify deck labels
+                    };
+                    // Create and configure the Label controls
+                    Label deckLabel = new Label
+                    {
+                        Size = new Size(100, 20), // Set the size of the Label
+                        Text = $"{player.Name}: {player.HandCount} cards", // Set the text of the Label
+                        TextAlign = ContentAlignment.MiddleCenter, // Center the text
+                        Location = new Point(deckPictureBox.Left, deckPictureBox.Bottom + 5), // Position below the PictureBox
+                        Anchor = AnchorStyles.Top | AnchorStyles.Right, // Anchor to the top-right corner
+                        BackColor = Color.Transparent, // Optional: Set the background color
+                        Tag = "DeckLabel" // Tag to identify deck labels
+                    };
 
-        // Add the PictureBox and Label to the form's controls
-        Controls.Add(deckPictureBox);
-        Controls.Add(deckLabel);
-    }
+                    // Add the PictureBox and Label to the form's controls
+                    Controls.Add(deckPictureBox);
+                    Controls.Add(deckLabel);
+                }
 
- }
+            }
 
-        // Add the PictureBox and Label to the form's controls
-        Controls.Add(deckPictureBox);
-        Controls.Add(deckLabel);
-    }
+            // Add the PictureBox and Label to the form's controls
+            Controls.Add(deckPictureBox);
+            Controls.Add(deckLabel);
+        }
 
  }
 
