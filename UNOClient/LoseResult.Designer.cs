@@ -43,6 +43,7 @@
             this.btnFinish.TabIndex = 3;
             this.btnFinish.Text = "Finish";
             this.btnFinish.UseVisualStyleBackColor = false;
+            this.btnFinish.Click += new System.EventHandler(this.btnFinish_Click);
             // 
             // btnRestart
             // 
@@ -54,6 +55,7 @@
             this.btnRestart.TabIndex = 2;
             this.btnRestart.Text = "Restart";
             this.btnRestart.UseVisualStyleBackColor = false;
+            this.btnRestart.Click += new System.EventHandler(this.btnRestart_Click);
             // 
             // LoseResult
             // 

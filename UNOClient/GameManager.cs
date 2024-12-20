@@ -138,7 +138,7 @@ namespace UnoOnline
         }
         public bool IsValidMove(Card card)
         {
-            return card.Color == Instance.CurrentCard.Color || card.Value == Instance.CurrentCard.Value || card.Color == "Wild" || (Instance.CurrentCard.CardName.Contains("Wild") && card.CardName.Contains("Wild"));
+            return card.Color == Instance.CurrentCard.Color || card.Value == Instance.CurrentCard.Value || card.Color == "Wild" ;
         }
         public void HandleUpdate(Message message)
         {
@@ -148,13 +148,13 @@ namespace UnoOnline
                 // Message received: Update; ID; RemainingCards; CardName (if a card is played); color (if the card is a wild card)
                 if (data.Length < 2)
                 {
-                    throw new ArgumentException("Invalid message data: not enough elements.");
+                    throw new ArgumentException("Invalid card data: not enough elements.");
                 }
-
+                //Update;anle;7
                 string playerId = data[0];
                 if (!int.TryParse(data[1], out int remainingCards))
                 {
-                    throw new FormatException("Input string was not in a correct format.");
+                    throw new FormatException("Input string was not in a correct format: " + data[1]); //7Turn
                 }
 
                 // Find the player in the list
@@ -181,11 +181,18 @@ namespace UnoOnline
                         }
                         Instance.CurrentCard.Color = card[0];
                         Instance.CurrentCard.Value = card[1];
+                        if (Instance.CurrentCard.CardName.Contains("Draw"))
+                        {
+                            Instance.IsSpecialDraw = true;
+                        }
+                        else
+                        {
+                            Instance.IsSpecialDraw = false;
+                        }
                     }
                     // If the card is a wild card or draw 4
                     else if (data.Length == 4)
                     {
-                        IsSpecialDraw = true;
                         if (Instance.CurrentCard == null)
                         {
                             Instance.CurrentCard = new Card();
@@ -198,6 +205,14 @@ namespace UnoOnline
                         }
                         Instance.CurrentCard.Value = card[1];
                         Instance.CurrentCard.Color = data[3];
+                        if (Instance.CurrentCard.CardName.Contains("Draw"))
+                        {
+                            Instance.IsSpecialDraw = true;
+                        }
+                        else
+                        {
+                            Instance.IsSpecialDraw = false;
+                        }
                     }
                 }
 
@@ -230,6 +245,10 @@ namespace UnoOnline
             {
                 MessageBox.Show("Invalid card data: " + ex.Message);
             }
+            catch (IndexOutOfRangeException ex)
+            {
+                MessageBox.Show("Index was outside the bounds of the array: " + ex.Message);
+            }
             catch (NullReferenceException ex)
             {
                 MessageBox.Show("Object not initialized: " + ex.Message);
@@ -247,10 +266,11 @@ namespace UnoOnline
                 Form1.UpdateCurrentPlayerLabel(playerId);
                 if (playerId == Program.player.Name)
                 {
-                    MessageBox.Show("It's the current player's turn.");
+                    //MessageBox.Show("It's the current player's turn.");
 
                     if (Instance.CurrentCard.CardName.Contains("Draw") && Instance.IsSpecialDraw == true ) //Bị rút bài
                     {
+                        Instance.IsSpecialDraw = false;
                         if (Instance.CurrentCard.CardName.Contains("Wild"))
                             // Draw 4
                             ClientSocket.SendData(new Message(MessageType.SpecialCardEffect, new List<string> { Program.player.Name, (Instance.Players[0].Hand.Count + 4).ToString() }));
@@ -287,8 +307,8 @@ namespace UnoOnline
         {
             try
             {
-                // Specialdraws;anle;Yellow_Skip_;Green_Draw;Green_7;Red_3;
-                string[] data = message.Data.ToArray();
+                // Example message data: "Specialdraws;anle;Yellow_Skip_;Green_Draw;Green_7;Red_3;"
+                string[] data = message.Data.Where(d => !string.IsNullOrEmpty(d)).ToArray();
                 if (data.Length < 2)
                 {
                     throw new ArgumentException("Invalid message data: not enough elements.");
@@ -372,21 +392,27 @@ namespace UnoOnline
             }
         }
 
-            public static void HandleEndMessage(Message message)
+        public static void HandleEndMessage(Message message)
         {
             string[] data = message.Data.ToArray();
             string winnerName = data[0];
             int PenaltyPoint = Instance.Players[0].Hand.Count * 10;
             if (winnerName == Program.player.Name)
             {
-                WinResult winResult = new WinResult();
-                winResult.Show();
+                Application.OpenForms[0].Invoke(new Action(() =>
+                {
+                    WinResult winResult = new WinResult();
+                    winResult.Show();
+                }));
             }
             else
             {
                 ClientSocket.SendData(new Message(MessageType.Diem, new List<string> { Program.player.Name, PenaltyPoint.ToString() }));
-                LoseResult loseResult = new LoseResult();
-                loseResult.Show();
+                Application.OpenForms[0].Invoke(new Action(() =>
+                {
+                    LoseResult loseResult = new LoseResult();
+                    loseResult.Show();
+                }));
             }
         }
 
@@ -402,17 +428,11 @@ namespace UnoOnline
                 player.Points = points;
                 player.Rank = rank;
             }
-            //Hiển thị bảng xếp hạng cho tất cả người chơi
-            FinalRanking.DisplayRanking(Instance.Players);
-        }
-
-        public static void HandleDisconnect(Message message)
-        {
-            var disconnectingPlayer = ClientSocket.gamemanager.Players.FirstOrDefault(p => p.Name == message.Data[0]);
-            if (disconnectingPlayer != null)
+            Application.OpenForms[0].Invoke(new Action(() =>
             {
-                ClientSocket.gamemanager.Players.Remove(disconnectingPlayer);
-            }
+                FinalRanking finalRanking = new FinalRanking();
+                finalRanking.Show();
+            }));
         }
     }
 }

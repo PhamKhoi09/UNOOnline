@@ -707,31 +707,7 @@ namespace UnoOnline {
             yellowButton.Enabled = false;
             blueButton.Enabled = false;
         }
-        private void RedButton_Click(object sender, EventArgs e)
-        {
-            GameManager.Instance.CurrentCard.Color = "Red";
-            //Gửi thông điệp đến server theo định dạng DanhBai;ID;SoLuongBaiTrenTay;CardName;color
-            ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count).ToString(), GameManager.Instance.CurrentCard.CardName, GameManager.Instance.CurrentCard.Color }));
-            DisableColorButtons();
-        }
-        private void GreenButton_Click(object sender, EventArgs e)
-        {
-            GameManager.Instance.CurrentCard.Color = "Green";
-            ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count ).ToString(), GameManager.Instance.CurrentCard.CardName, GameManager.Instance.CurrentCard.Color }));
-            DisableCardAndDrawButton();
-        }
-        private void YellowButton_Click(object sender, EventArgs e)
-        {
-            GameManager.Instance.CurrentCard.Color = "Yellow";
-            ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count ).ToString(), GameManager.Instance.CurrentCard.CardName, GameManager.Instance.CurrentCard.Color }));
-            DisableCardAndDrawButton();
-        }
-        private void BlueButton_Click(object sender, EventArgs e)
-        {
-            GameManager.Instance.CurrentCard.Color = "Blue";
-            ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count).ToString(), GameManager.Instance.CurrentCard.CardName, GameManager.Instance.CurrentCard.Color }));
-            DisableCardAndDrawButton();
-        }
+        
         private void CardButton_Click(object sender, EventArgs e)
         {
             Button clickedButton = (Button)sender;
@@ -761,6 +737,31 @@ namespace UnoOnline {
             {
                 MessageBox.Show("Invalid move.");
             }
+        }
+        private void RedButton_Click(object sender, EventArgs e)
+        {
+            GameManager.Instance.CurrentCard.Color = "Red";
+            //Gửi thông điệp đến server theo định dạng DanhBai;ID;SoLuongBaiTrenTay;CardName;color
+            ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count).ToString(), GameManager.Instance.CurrentCard.CardName, GameManager.Instance.CurrentCard.Color }));
+            DisableColorButtons();
+        }
+        private void GreenButton_Click(object sender, EventArgs e)
+        {
+            GameManager.Instance.CurrentCard.Color = "Green";
+            ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count).ToString(), GameManager.Instance.CurrentCard.CardName, GameManager.Instance.CurrentCard.Color }));
+            DisableCardAndDrawButton();
+        }
+        private void YellowButton_Click(object sender, EventArgs e)
+        {
+            GameManager.Instance.CurrentCard.Color = "Yellow";
+            ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count).ToString(), GameManager.Instance.CurrentCard.CardName, GameManager.Instance.CurrentCard.Color }));
+            DisableCardAndDrawButton();
+        }
+        private void BlueButton_Click(object sender, EventArgs e)
+        {
+            GameManager.Instance.CurrentCard.Color = "Blue";
+            ClientSocket.SendData(new Message(MessageType.DanhBai, new List<string> { GameManager.Instance.Players[0].Name, (GameManager.Instance.Players[0].Hand.Count).ToString(), GameManager.Instance.CurrentCard.CardName, GameManager.Instance.CurrentCard.Color }));
+            DisableCardAndDrawButton();
         }
         private void DrawCardButton_Click(object sender, EventArgs e)
         {

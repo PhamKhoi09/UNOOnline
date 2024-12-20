@@ -260,7 +260,7 @@ public enum MessageType
     Result,
     Diem,
     YellUNOEnable,
-    ReStart,
+    Restart,
     Finish,
     NotEnoughPlayers,
 }

@@ -19,7 +19,7 @@ namespace UnoOnline
 
         private void btnRestart_Click(object sender, EventArgs e)
         {
-            ClientSocket.SendData(new Message(MessageType.ReStart, new List<string> { Program.player.Name }));
+            ClientSocket.SendData(new Message(MessageType.Restart, new List<string> { Program.player.Name }));
         }
 
         private void btnFinish_Click(object sender, EventArgs e)
