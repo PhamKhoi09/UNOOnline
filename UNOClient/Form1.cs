@@ -636,9 +636,8 @@ namespace UnoOnline
         {
             Message yellUNOMessage = new Message(MessageType.YellUNO, new List<string> { Program.player.Name });
             ClientSocket.SendData(yellUNOMessage);
-            //Disable uno button
+            // Disable uno button
             yellUNOButton.Enabled = false;
-
         }
 
 
@@ -676,7 +675,7 @@ namespace UnoOnline
             int cardWidth = 100; // Increased card width
             int cardHeight = 150; // Increased card height
 
-            foreach (var card in playerHand.ToList())
+            foreach (var card in playerHand)
             {
                 if (card == null)
                 {
@@ -712,21 +711,35 @@ namespace UnoOnline
         {
             if (card == null)
             {
-                System.Diagnostics.Debug.WriteLine("Card cannot be null.");
-                throw new ArgumentNullException(nameof(card), "Card cannot be null.");
+                MessageBox.Show("Card is null in GetCardImage.");
+                return null;
             }
 
-            System.Diagnostics.Debug.WriteLine("Getting image for card: " + card.CardName);
+            string cardImagePath = "";
 
-            // Xử lý các thẻ đặc biệt như "Wild" 
+            // Xử lý các thẻ đặc biệt như "Wild"
             if (card.Color == "Wild")
             {
                 if (card.Value == "Draw")
-                    return Image.FromFile($"Resources/CardImages/Wild_Draw.png");
-                return Image.FromFile($"Resources/CardImages/Wild.png");
+                    cardImagePath = Path.Combine("Resources", "CardImages", "Wild_Draw.png");
+                else
+                    cardImagePath = Path.Combine("Resources", "CardImages", "Wild.png");
             }
-            // Đối với các lá bài màu
-            return Image.FromFile($"Resources/CardImages/{card.Color}_{card.Value}.png");
+            else
+            {
+                // Đối với các lá bài màu
+                cardImagePath = Path.Combine("Resources", "CardImages", $"{card.Color}_{card.Value}.png");
+            }
+
+            if (File.Exists(cardImagePath))
+            {
+                return Image.FromFile(cardImagePath);
+            }
+            else
+            {
+                MessageBox.Show($"Card image not found: {cardImagePath}");
+                return null;
+            }
         }
         private void EnableColorButtons()
         {
@@ -796,9 +809,11 @@ namespace UnoOnline
         }
         private void DrawCardButton_Click(object sender, EventArgs e)
         {
-            ClientSocket.SendData(new Message(MessageType.RutBai, new List<string> { Program.player.Name, ((GameManager.Instance.Players[0].Hand.Count) + 1).ToString() }));
+            ClientSocket.SendData(new Message(MessageType.RutBai, new List<string> { Program.player.Name, (GameManager.Instance.Players[0].Hand.Count + 1).ToString() }));
             // Cập nhật giao diện
             DisplayPlayerHand(GameManager.Instance.Players[0].Hand);
+            // Update clientInfoLabel
+            clientInfoLabel.Text = $"Tên: {Program.player.Name}, Số bài: {GameManager.Instance.Players[0].Hand.Count}";
             DisableCardAndDrawButton();
         }
 
