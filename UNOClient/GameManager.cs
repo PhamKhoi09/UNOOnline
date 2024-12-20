@@ -420,7 +420,7 @@ namespace UnoOnline
                 MessageBox.Show("Form1 is null.");
             }
         }
-        public void HandleNotEnoughPlayer(Message message)
+        public static void HandleNotEnoughPlayer(Message message)
         {
             //Hiển thị thông báo không đủ người chơi nếu form1 chưa bật
             //Hiển thị thông báo kết thúc game vì có người chơi thoát đột ngột ( và số người chơi còn lại ít hơn 2)
