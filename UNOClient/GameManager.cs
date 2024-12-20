@@ -318,25 +318,24 @@ namespace UnoOnline
                     return new Card(cardData, color, value);
                 }).ToList());
 
-    //Hiển thị bài trên tay
-    Form1.ActiveForm.Invoke(new Action(() =>
-    {
-        Form1 form1 = (Form1)Application.OpenForms.OfType<Form1>().FirstOrDefault();
-        if (form1 != null)
-        {
-<<<<<<< Updated upstream
-            form1.DisplayPlayerHand(player.Hand);
-=======
-                    form1.Invoke(new Action(() =>
+                //Hiển thị bài trên tay
+                Form1.ActiveForm.Invoke(new Action(() =>
+                {
+                    Form1 form1 = (Form1)Application.OpenForms.OfType<Form1>().FirstOrDefault();
+                    if (form1 != null)
                     {
                         form1.DisplayPlayerHand(Instance.Players[0].Hand);
-                        form1.InitializeDeckImages(); // Refresh the deck images and labels
-                    }));
-                }
-                else
-                {
-                    MessageBox.Show("Form1 is null.");
-                }
+                        form1.Invoke(new Action(() =>
+            {
+                form1.DisplayPlayerHand(Instance.Players[0].Hand);
+                form1.InitializeDeckImages(); // Refresh the deck images and labels
+            }));
+                    }
+                    else
+                    {
+                        MessageBox.Show("Form1 is null.");
+                    }
+                }));
             }
             catch (ArgumentException ex)
             {
