@@ -1,4 +1,4 @@
-﻿using System;
+﻿    using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -813,7 +813,7 @@ namespace UnoOnline
             // Cập nhật giao diện
             DisplayPlayerHand(GameManager.Instance.Players[0].Hand);
             // Update clientInfoLabel
-            clientInfoLabel.Text = $"Tên: {Program.player.Name}, Số bài: {GameManager.Instance.Players[0].Hand.Count}";
+            clientInfoLabel.Text = $"Tên: {Program.player.Name}";
             DisableCardAndDrawButton();
         }
 
